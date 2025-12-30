@@ -50,3 +50,25 @@ export async function deletePhoto(id: string, url: string) {
     });
   }
 }
+
+export async function uploadToStorage(file: File) {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/memories/${filePath}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY!,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': file.type,
+    },
+    body: file
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to upload image');
+  }
+
+  return `${SUPABASE_URL}/storage/v1/object/public/memories/${filePath}`;
+}

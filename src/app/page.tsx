@@ -17,15 +17,15 @@ export default function HomePage() {
   const [photoCount, setPhotoCount] = useState(0);
 
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  });
+  const { scrollY } = useScroll();
   
   // Hero animations based on scroll
-  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 400], [1, 0.85]);
+  const heroY = useTransform(scrollY, [0, 400], [0, -100]);
+
+  // Background Aurora opacity for the rest of the page
+  const bgAuroraOpacity = useTransform(scrollY, [200, 800], [0, 0.3]);
 
   useEffect(() => {
     const updateCounter = () => {
@@ -63,7 +63,20 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="bg-black">
+    <div className="bg-black relative">
+      {/* Global Persistent Aurora Background */}
+      <motion.div 
+        style={{ opacity: bgAuroraOpacity }}
+        className="fixed inset-0 z-0 pointer-events-none"
+      >
+        <Aurora
+          colorStops={["#017ed5", "#14e818", "#b53dff"]}
+          blend={0.6}
+          amplitude={0.8}
+          speed={0.2}
+        />
+      </motion.div>
+
       {/* Hero Section */}
       <div ref={containerRef} className="relative min-h-screen flex flex-col items-center justify-center p-6 pt-32 pb-12 overflow-hidden">
         {/* New Aurora Hero Background */}
@@ -141,7 +154,14 @@ export default function HomePage() {
 
       {/* Final CTA Section */}
       <section className="relative py-32 px-6 flex flex-col items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-green-500/5 to-transparent" />
+        <div className="absolute inset-0 z-0 opacity-30 pointer-events-none">
+          <Aurora
+            colorStops={["#b53dff", "#017ed5", "#14e818"]}
+            blend={0.5}
+            amplitude={1.0}
+            speed={0.4}
+          />
+        </div>
         
         <motion.div
           initial={{ opacity: 0, y: 40 }}

@@ -1,8 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import Image from 'next/image';
+import { Aurora } from './Aurora';
 
 const JOURNEY_DATA = [
   {
@@ -14,50 +12,50 @@ const JOURNEY_DATA = [
   {
     image: '/journey/2.jpg',
     title: 'Growing Together',
-    description: "Finding comfort in each other's presence, building dreams one day at a time.",
-    year: '2020'
+    description: "From guiding your first steps to witnessing the person you\’ve become.",
+    year: ''
   },
   {
     image: '/journey/3.jpg',
     title: 'Eternal Bond',
     description: "A love that grows stronger with every passing season, bound by shared memories.",
-    year: '2022'
+    year: ''
   },
     {
       image: '/journey/4.jpg',
-      title: 'Cozy Moments',
-      description: "Here's all the kdrama and movie time ✨",
-      year: '2023'
+      title: 'Heart to Heart',
+      description: "The deep conversations and quiet moments that forge our unbreakable bond.",
+      year: ''
     },
     {
       image: '/journey/5.jpg',
-      title: 'Warm Hugs',
-      description: 'The safest place in the world is within your arms.',
-      year: '2023'
+      title: 'Small Rides',
+      description: 'Remember our small rides? Every journey with you is an adventure.',
+      year: ''
     },
     {
       image: '/journey/6.jpg',
-      title: 'Heart to Heart',
-      description: 'Deep conversations and quiet moments that define our bond.',
-      year: '2024'
+      title: 'The Fragrance',
+      description: 'After hours in each other\'s arms, a part of us remains long after we\'ve parted.',
+      year: ''
     },
     {
       image: '/journey/7.jpg',
-      title: 'Small Rides',
-      description: 'Remember our small rides? Every journey with you is an adventure.',
-      year: '2024'
+      title: 'Warm Hugs',
+      description: 'The safest place in the world is within your arms..',
+      year: ''
     },
     {
       image: '/journey/8.jpg',
-      title: 'That Fragrance',
-      description: 'This one alsoo ..... that fragrance 🥰',
-      year: '2025'
+      title: 'Ego Clashes',
+      description: 'Two forces of nature, matched in will, are more formidable than any foe.',
+      year: ''
     },
     {
       image: '/journey/9.jpg',
-      title: 'Missing You',
-      description: 'I miss this one ☝🏻 Every moment apart only makes me love you more.',
-      year: '2025'
+      title: 'Confort Zone',
+      description: 'A sanctuary where we are free to be ourselves, in every mood and every light.',
+      year: ''
     },
     {
       image: '/journey/10.jpg',
@@ -79,7 +77,7 @@ const JOURNEY_DATA = [
     },
     {
     image: '/journey/13.jpg',
-    title: 'The Beginning',
+    title: 'Cozy Moments',
     description: 'Where our story first sparked into life. Every moment since has been a treasure.',
     year: '2020'
     },
@@ -170,8 +168,18 @@ function JourneyItem({ item, index }: { item: typeof JOURNEY_DATA[0], index: num
 
 export function JourneySection() {
   return (
-    <section className="relative bg-black px-6">
-      <div className="max-w-7xl mx-auto">
+    <section className="relative bg-black px-6 overflow-hidden">
+      {/* Background Aurora for this section */}
+      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+        <Aurora
+          colorStops={["#14e818", "#017ed5", "#b53dff"]}
+          blend={0.5}
+          amplitude={1.0}
+          speed={0.3}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="pt-32 pb-16 text-center space-y-4">
           <motion.h2 

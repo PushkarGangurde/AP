@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Image as ImageIcon, ArrowRight, Heart } from 'lucide-react';
 import Link from 'next/link';
@@ -16,12 +16,16 @@ export default function HomePage() {
   const [timeSince, setTimeSince] = useState<Duration>({});
   const [photoCount, setPhotoCount] = useState(0);
 
-  const { scrollYProgress } = useScroll();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
   
   // Hero animations based on scroll
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
-  const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -100]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
   useEffect(() => {
     const updateCounter = () => {
@@ -61,7 +65,7 @@ export default function HomePage() {
   return (
     <div className="bg-black">
       {/* Hero Section */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center p-6 pt-32 pb-12 overflow-hidden">
+      <div ref={containerRef} className="relative min-h-screen flex flex-col items-center justify-center p-6 pt-32 pb-12 overflow-hidden">
         {/* New Aurora Hero Background */}
         <motion.div 
           style={{ opacity: heroOpacity }}
@@ -77,7 +81,7 @@ export default function HomePage() {
 
         <motion.div 
           style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
-          className="z-10 w-full max-w-4xl flex flex-col items-center space-y-16 translate-y-8"
+          className="z-10 w-full max-w-4xl flex flex-col items-center space-y-16"
         >
           {/* Introducing 7to14 Section */}
           <motion.div

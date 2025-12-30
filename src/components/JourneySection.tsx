@@ -8,19 +8,19 @@ const JOURNEY_DATA = [
   {
     image: '/journey/1.jpg',
     title: 'The Beginning',
-    description: 'Where our story first sparked into life. Every moment since has been a treasure.',
+    description: "Where our story first sparked into life. Every moment since has been a treasure.",
     year: '2020'
   },
   {
     image: '/journey/2.jpg',
     title: 'Growing Together',
-    description: 'Finding comfort in each other\'s presence, building dreams one day at a time.',
-    year: ''
+    description: "Finding comfort in each other's presence, building dreams one day at a time.",
+    year: '2020'
   },
   {
     image: '/journey/3.jpg',
     title: 'Eternal Bond',
-    description: 'A love that grows stronger with every passing season, bound by shared memories.',
+    description: "A love that grows stronger with every passing season, bound by shared memories.",
     year: '2022'
   },
     {
@@ -109,15 +109,12 @@ function JourneyItem({ item, index }: { item: typeof JOURNEY_DATA[0], index: num
   const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
-    return (
-      <motion.div
-        ref={ref}
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, margin: "-100px" }}
-        className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} items-center justify-between gap-12 py-24 md:py-32`}
-      >
+      return (
+        <motion.div
+          ref={ref}
+          style={{ opacity, y }}
+          className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} items-center justify-between gap-12 py-24 md:py-32`}
+        >
       {/* Text Content */}
       <motion.div 
         initial={{ opacity: 0, x: isEven ? -50 : 50 }}

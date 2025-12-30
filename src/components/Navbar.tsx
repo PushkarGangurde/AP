@@ -3,14 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Image as ImageIcon, User, Users, ExternalLink } from 'lucide-react';
+import { Home, Image as ImageIcon, User, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Home', href: '/', icon: Home },
-  { label: 'Pushkar Ji', href: 'https://pushkarji.com', icon: ExternalLink, external: true },
-  { label: 'Ours', href: '/ours', icon: Users },
-  { label: 'Tanu', href: '/tanu', icon: User },
+  { label: 'Ours', href: '/ours', icon: ImageIcon },
+  { label: 'Tanu', href: '/tanu', icon: Heart },
   { label: 'Pushkar', href: '/pushkar', icon: User },
 ];
 

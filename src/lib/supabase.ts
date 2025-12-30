@@ -26,20 +26,27 @@ export async function uploadPhoto(url: string, month: string, year: number, mont
   return res.json();
 }
 
-// For storage, we'll use the storage API
-export async function uploadToStorage(file: File) {
-  const fileName = `${Date.now()}-${file.name}`;
-  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/memories/${fileName}`, {
-    method: 'POST',
+export async function deletePhoto(id: string, url: string) {
+  // Extract filename from URL
+  const fileName = url.split('/').pop();
+  
+  // Delete from DB
+  await fetch(`${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`, {
+    method: 'DELETE',
     headers: {
       'apikey': SUPABASE_ANON_KEY!,
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': file.type
-    },
-    body: file
+    }
   });
-  
-  if (!res.ok) throw new Error('Upload failed');
-  
-  return `${SUPABASE_URL}/storage/v1/object/public/memories/${fileName}`;
+
+  // Delete from Storage
+  if (fileName) {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/memories/${fileName}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY!,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      }
+    });
+  }
 }

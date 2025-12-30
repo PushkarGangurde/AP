@@ -13,19 +13,27 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Using the access code from .env via a client-side check for now
-    // In a real app, this should be an API call, but for this private site,
-    // we'll keep it simple.
-    if (code === '2020') {
-      document.cookie = 'couple_auth=true; path=/; max-age=31536000'; // 1 year
-      toast.success('Welcome home!');
-      router.push('/');
-    } else {
-      toast.error('Incorrect code');
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+
+      if (response.ok) {
+        toast.success('Welcome home!');
+        router.push('/');
+        router.refresh();
+      } else {
+        toast.error('Incorrect code');
+        setLoading(false);
+      }
+    } catch (error) {
+      toast.error('Something went wrong');
       setLoading(false);
     }
   };

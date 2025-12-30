@@ -182,7 +182,7 @@ export default function HomePage() {
           </p>
         </motion.div>
 
-        <div className="h-[600px] relative w-full border-y border-white/5">
+        <div className="h-[900px] relative w-full border-y border-white/5">
           <FlowingMenu 
             items={PLACES_TO_VISIT} 
             textColor="#fff"

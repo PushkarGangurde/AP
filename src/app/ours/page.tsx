@@ -271,96 +271,20 @@ export default function OursPage() {
                   </div>
                 </DialogContent>
               </Dialog>
-
-        {isAdmin && (
-          <div className="flex justify-center flex-col items-center space-y-4">
-            <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="rounded-full bg-white text-black hover:bg-slate-200 shadow-lg px-8 h-12 border-none group">
-                    <Plus stroke="url(#aurora-gradient)" className="mr-2" size={18} /> Add Memory
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="rounded-3xl border-slate-800 bg-slate-950 text-white">
-                  <DialogHeader>
-                    <DialogTitle className="font-sans text-xl">Capture a Memory</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-6 pt-4">
-                    <div className="space-y-2">
-                      <label className="text-xs uppercase tracking-widest text-slate-500">Photo</label>
-                      <div className="border-2 border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center space-y-4 hover:border-green-500 transition-colors cursor-pointer relative overflow-hidden">
-                        <Input 
-                          type="file" 
-                          className="absolute inset-0 opacity-0 cursor-pointer" 
-                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                          accept="image/*"
-                        />
-                        {selectedFile ? (
-                          <div className="text-center">
-                            <ImageIcon stroke="url(#aurora-gradient)" className="mx-auto mb-2" size={32} />
-                            <p className="text-sm text-slate-300 truncate max-w-[200px]">{selectedFile.name}</p>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <Upload className="mx-auto text-slate-600 mb-2" size={32} />
-                            <p className="text-sm text-slate-600">Click or drag to upload</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs uppercase tracking-widest text-slate-500">Month</label>
-                      <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                        <SelectTrigger className="rounded-xl border-slate-800 bg-slate-900">
-                          <SelectValue placeholder="Month" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-800 bg-slate-950 text-white">
-                          {months.map(m => (
-                            <SelectItem key={m} value={m}>{m}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs uppercase tracking-widest text-slate-500">Year</label>
-                      <Select value={selectedYear} onValueChange={setSelectedYear}>
-                        <SelectTrigger className="rounded-xl border-slate-800 bg-slate-900">
-                          <SelectValue placeholder="Year" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-800 bg-slate-950 text-white">
-                          {[2020, 2021, 2022, 2023, 2024, 2025].map(y => (
-                            <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <Button 
-                    className="w-full h-12 bg-purple-600 hover:bg-purple-500 rounded-xl shadow-md text-white font-medium border-none"
-                    onClick={handleUpload}
-                    disabled={uploading || !selectedFile}
-                  >
-                    {uploading ? <Loader fullScreen={false} size={24} /> : 'Save Memory'}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-slate-500 hover:text-red-400"
-              onClick={() => {
-                localStorage.removeItem('is_admin');
-                setIsAdmin(false);
-                toast.info('Admin mode disabled');
-              }}
-            >
-              Disable Admin Mode
-            </Button>
-          </div>
-        )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-slate-500 hover:text-red-400"
+                onClick={() => {
+                  localStorage.removeItem('is_admin');
+                  setIsAdmin(false);
+                  toast.info('Admin mode disabled');
+                }}
+              >
+                Disable Admin Mode
+              </Button>
+            </div>
+          )}
 
         <div className="space-y-16">
           {loading ? (
@@ -448,10 +372,10 @@ export default function OursPage() {
                 alt="Full memory" 
                 className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
               />
-              <div className="mt-6 text-center text-white space-y-1">
-                <p className="font-serif italic text-xl">{selectedPhoto.month} {selectedPhoto.year}</p>
-                <p className="text-white/50 text-xs uppercase tracking-widest">A captured moment together</p>
-              </div>
+                <div className="mt-6 text-center text-white space-y-1">
+                  <p className="font-sans text-xl">{selectedPhoto.month} {selectedPhoto.year}</p>
+                  <p className="text-white/50 text-xs uppercase tracking-widest">A captured moment together</p>
+                </div>
             </motion.div>
           </motion.div>
         )}

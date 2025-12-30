@@ -70,19 +70,6 @@ export default function HomePage() {
           transition={{ duration: 1, ease: "easeOut" }}
           className="flex flex-col items-center text-center space-y-4"
         >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-4"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-green-300 font-medium">Est. Jan 2020</span>
-          </motion.div>
-          
           <h1 className="text-6xl md:text-8xl font-sans text-white tracking-tighter">
             <span className="block text-slate-400 text-2xl md:text-3xl tracking-[0.2em] uppercase mb-2 opacity-50">Introducing</span>
             7to14
@@ -94,22 +81,37 @@ export default function HomePage() {
         </motion.div>
 
         {/* Relationship Counter - Premium Style */}
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 w-full max-w-3xl">
-          {timeUnits.map((unit, index) => (
-            <motion.div
-              key={unit.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 + index * 0.1 }}
-              className="relative group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-green-500/20 to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative bg-white/5 border border-white/10 backdrop-blur-xl p-4 rounded-2xl flex flex-col items-center justify-center transition-all group-hover:bg-white/10 group-hover:-translate-y-1">
-                <span className="text-3xl font-sans text-white">{unit.value ?? 0}</span>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-500 mt-1">{unit.label}</span>
-              </div>
-            </motion.div>
-          ))}
+        <div className="flex flex-col items-center space-y-8 w-full max-w-4xl">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-green-300 font-medium">since jan 2020</span>
+          </motion.div>
+
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 w-full max-w-3xl">
+            {timeUnits.map((unit, index) => (
+              <motion.div
+                key={unit.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-b from-green-500/20 to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative bg-white/5 border border-white/10 backdrop-blur-xl p-4 rounded-2xl flex flex-col items-center justify-center transition-all group-hover:bg-white/10 group-hover:-translate-y-1">
+                  <span className="text-3xl font-sans text-white">{unit.value ?? 0}</span>
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-slate-500 mt-1">{unit.label}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         {/* CTA Section */}

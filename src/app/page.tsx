@@ -21,8 +21,8 @@ const PLACES_TO_VISIT = [
   { link: '#', text: 'Kashmir', image: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=1000' },
   { link: '#', text: 'Ladakh', image: 'https://images.unsplash.com/photo-1581791534721-e599df4417f7?q=80&w=1000' },
   { link: '#', text: 'Brooklyn', image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1000' },
-  { link: '#', text: 'Beach (TBD)', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000' },
-  { link: '#', text: 'Darjeeling', image: 'https://images.unsplash.com/photo-1544460481-37d4f9b870c5?q=80&w=1000' },
+  { link: '#', text: 'Beach', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000' },
+  { link: '#', text: 'Darjeeling', image: 'https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=1000' },
 ];
 
 export default function HomePage() {

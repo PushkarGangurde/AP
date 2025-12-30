@@ -71,7 +71,7 @@ export default function HomePage() {
           className="flex flex-col items-center text-center space-y-4"
         >
           <h1 className="text-6xl md:text-8xl font-sans text-white tracking-tighter">
-            <span className="block text-slate-400 text-2xl md:text-3xl tracking-[0.2em] uppercase mb-2 opacity-50">Introducing</span>
+            <span className="block text-slate-400 text-2xl md:text-3xl tracking-[0.2em] uppercase mb-2 opacity-50">Welcome to</span>
             7to14
           </h1>
           

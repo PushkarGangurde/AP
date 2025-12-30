@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 
 const JOURNEY_DATA = [
@@ -25,86 +25,111 @@ const JOURNEY_DATA = [
   }
 ];
 
-export function JourneySection() {
-  const containerRef = useRef<HTMLDivElement>(null);
+function JourneyItem({ item, index }: { item: typeof JOURNEY_DATA[0], index: number }) {
+  const isEven = index % 2 === 0;
+  const ref = useRef<HTMLDivElement>(null);
+  
   const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
+    target: ref,
+    offset: ["start end", "end start"]
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
+  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   return (
-    <div ref={containerRef} className="relative h-[300vh] bg-black">
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
-        {JOURNEY_DATA.map((item, index) => {
-          const start = index / JOURNEY_DATA.length;
-          const end = (index + 1) / JOURNEY_DATA.length;
+    <motion.div
+      ref={ref}
+      style={{ opacity }}
+      className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} items-center justify-between gap-12 py-24 md:py-32`}
+    >
+      {/* Text Content */}
+      <motion.div 
+        initial={{ opacity: 0, x: isEven ? -50 : 50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+        className="flex-1 space-y-6"
+      >
+        <div className="space-y-2">
+          <span className="text-green-400 font-mono text-sm tracking-[0.3em] uppercase block">
+            {item.year}
+          </span>
+          <h2 className="text-4xl md:text-6xl font-sans text-white tracking-tighter">
+            {item.title}
+          </h2>
+        </div>
+        <p className="text-slate-400 text-base md:text-xl font-light leading-relaxed max-w-lg">
+          {item.description}
+        </p>
+        <div className="h-px w-24 bg-gradient-to-r from-green-500/50 to-transparent" />
+      </motion.div>
+
+      {/* Image Container */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, x: isEven ? 50 : -50 }}
+        whileInView={{ opacity: 1, scale: 1, x: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true, margin: "-100px" }}
+        className="flex-1 w-full max-w-md"
+      >
+        <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 group shadow-2xl shadow-green-500/5">
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
-          // Animations for each card
-          const opacity = useTransform(smoothProgress, [start, start + 0.1, end - 0.1, end], [0, 1, 1, 0]);
-          const scale = useTransform(smoothProgress, [start, start + 0.1, end - 0.1, end], [0.8, 1, 1, 0.9]);
-          const y = useTransform(smoothProgress, [start, start + 0.1, end - 0.1, end], [100, 0, 0, -100]);
-          const rotate = useTransform(smoothProgress, [start, end], [2, -2]);
+          {/* Decorative Elements */}
+          <div className="absolute top-4 right-4 px-3 py-1 rounded-full border border-white/10 bg-black/40 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[10px] text-white/60 tracking-widest uppercase font-medium">
+              #{index + 1}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
-          return (
-            <motion.div
-              key={index}
-              style={{ opacity, scale, y, rotate }}
-              className="absolute inset-0 flex items-center justify-center p-4 md:p-8"
-            >
-              <div className="relative w-full max-w-4xl aspect-[4/5] md:aspect-video rounded-3xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm group">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-700"
-                  priority={index === 0}
-                />
-                
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <span className="text-green-400 font-mono text-sm tracking-[0.3em] uppercase mb-4 block">
-                      {item.year}
-                    </span>
-                    <h2 className="text-4xl md:text-6xl font-sans text-white mb-4 tracking-tighter">
-                      {item.title}
-                    </h2>
-                    <p className="text-slate-400 text-sm md:text-lg max-w-xl font-light leading-relaxed">
-                      {item.description}
-                    </p>
-                  </motion.div>
-                </div>
+export function JourneySection() {
+  return (
+    <section className="relative bg-black px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="pt-32 pb-16 text-center space-y-4">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="text-white/30 text-xs tracking-[0.5em] uppercase font-light"
+          >
+            Our Journey
+          </motion.h2>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-5xl font-sans text-white tracking-tighter"
+          >
+            Chronicles of Love
+          </motion.div>
+        </div>
 
-                {/* Corner Label */}
-                <div className="absolute top-8 right-8 px-4 py-2 rounded-full border border-white/10 bg-black/40 backdrop-blur-md">
-                   <span className="text-[10px] text-white/60 tracking-widest uppercase font-medium">
-                     Memory {index + 1} / {JOURNEY_DATA.length}
-                   </span>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
+        {/* Journey Items */}
+        <div className="space-y-12">
+          {JOURNEY_DATA.map((item, index) => (
+            <JourneyItem key={index} item={item} index={index} />
+          ))}
+        </div>
 
-        {/* Scroll Progress Indicator */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-4">
-           <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/20 to-white/40" />
-           <span className="text-[10px] text-white/40 tracking-[0.4em] uppercase font-light">Scroll to Re-live</span>
+        {/* Bottom Decorative Line */}
+        <div className="flex justify-center pb-32">
+          <div className="h-24 w-px bg-gradient-to-b from-green-500/50 to-transparent" />
         </div>
       </div>
-    </div>
+    </section>
   );
 }

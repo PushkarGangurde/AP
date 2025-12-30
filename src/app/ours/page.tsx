@@ -2,8 +2,38 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Image as ImageIcon, Calendar, X, Upload, Loader2, Trash2, Maximize2 } from 'lucide-react';
+import { Plus, Image as ImageIcon, X, Upload, Loader2, Trash2, Maximize2 } from 'lucide-react';
 import { getPhotos, uploadPhoto, uploadToStorage, deletePhoto } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+interface Photo {
+  id: string;
+  url: string;
+  month: string;
+  year: number;
+  month_num: number;
+}
 
 export default function OursPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -20,7 +50,6 @@ export default function OursPage() {
 
   useEffect(() => {
     fetchPhotos();
-    // Check for admin flag in localStorage
     setIsAdmin(localStorage.getItem('is_admin') === 'true');
   }, []);
 
@@ -37,6 +66,12 @@ export default function OursPage() {
   };
 
   const handleAdminToggle = async () => {
+    // If already admin, we don't need to do anything
+    if (isAdmin) {
+      toast.info('You are already in admin mode');
+      return;
+    }
+
     const code = prompt('Enter Admin Code');
     if (!code) return;
 
@@ -92,7 +127,6 @@ export default function OursPage() {
     }
   };
 
-  // Group photos by year and month
   const groupedPhotos = photos.reduce((acc, photo) => {
     const key = `${photo.month} ${photo.year}`;
     if (!acc[key]) acc[key] = [];
@@ -114,204 +148,198 @@ export default function OursPage() {
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-12 h-12 glass rounded-full flex items-center justify-center text-[#ff9a9e]"
+            onClick={handleAdminToggle}
+            className="w-12 h-12 glass rounded-full flex items-center justify-center text-[#ff9a9e] cursor-pointer hover:scale-105 transition-transform"
           >
             <ImageIcon size={24} />
           </motion.div>
           <h1 className="text-3xl font-serif text-[#4a4a4a] italic">Shared Memories</h1>
-          
-            {/* Admin Toggle (Hidden way to enable upload for testing) */}
-            <div 
-              className="opacity-0 cursor-default h-2 w-2" 
-              onClick={handleAdminToggle}
-            />
-          </header>
+        </header>
 
-          {isAdmin && (
-            <div className="flex justify-center flex-col items-center space-y-4">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="rounded-full bg-[#ff9a9e] hover:bg-[#ff8a8e] shadow-lg px-8">
-                    <Plus className="mr-2" size={18} /> Add Memory
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="rounded-3xl border-[#e2e2e2] bg-white">
-                  <DialogHeader>
-                    <DialogTitle className="font-serif italic text-xl">Capture a Memory</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-6 pt-4">
-                    <div className="space-y-2">
-                      <label className="text-xs uppercase tracking-widest text-[#8e8e8e]">Photo</label>
-                      <div className="border-2 border-dashed border-[#e2e2e2] rounded-2xl p-8 flex flex-col items-center justify-center space-y-4 hover:border-[#ff9a9e] transition-colors cursor-pointer relative overflow-hidden">
-                        <Input 
-                          type="file" 
-                          className="absolute inset-0 opacity-0 cursor-pointer" 
-                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                          accept="image/*"
-                        />
-                        {selectedFile ? (
-                          <div className="text-center">
-                            <ImageIcon className="mx-auto text-[#ff9a9e] mb-2" size={32} />
-                            <p className="text-sm text-[#4a4a4a] truncate max-w-[200px]">{selectedFile.name}</p>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <Upload className="mx-auto text-[#8e8e8e] mb-2" size={32} />
-                            <p className="text-sm text-[#8e8e8e]">Click or drag to upload</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-xs uppercase tracking-widest text-[#8e8e8e]">Month</label>
-                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                          <SelectTrigger className="rounded-xl border-[#e2e2e2]">
-                            <SelectValue placeholder="Month" />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl border-[#e2e2e2]">
-                            {months.map(m => (
-                              <SelectItem key={m} value={m}>{m}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs uppercase tracking-widest text-[#8e8e8e]">Year</label>
-                        <Select value={selectedYear} onValueChange={setSelectedYear}>
-                          <SelectTrigger className="rounded-xl border-[#e2e2e2]">
-                            <SelectValue placeholder="Year" />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl border-[#e2e2e2]">
-                            {[2020, 2021, 2022, 2023, 2024, 2025].map(y => (
-                              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <Button 
-                      className="w-full h-12 bg-[#ff9a9e] hover:bg-[#ff8a8e] rounded-xl shadow-md"
-                      onClick={handleUpload}
-                      disabled={uploading || !selectedFile}
-                    >
-                      {uploading ? <Loader2 className="animate-spin" /> : 'Save Memory'}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-[#8e8e8e] hover:text-red-400"
-                onClick={() => {
-                  localStorage.removeItem('is_admin');
-                  setIsAdmin(false);
-                  toast.info('Admin mode disabled');
-                }}
-              >
-                Disable Admin Mode
-              </Button>
-            </div>
-          )}
-
-          <div className="space-y-16">
-            {loading ? (
-              <div className="flex justify-center pt-20">
-                <Loader2 className="animate-spin text-[#ff9a9e]" size={32} />
-              </div>
-            ) : photos.length === 0 ? (
-               <div className="text-center py-20 space-y-4">
-                  <ImageIcon className="mx-auto text-[#e2e2e2]" size={64} />
-                  <p className="text-[#8e8e8e] font-serif italic">No memories captured yet...</p>
-               </div>
-            ) : (
-              groupKeys.map((key) => (
-                <section key={key} className="space-y-6">
-                  <div className="flex items-center space-x-4">
-                    <h2 className="text-xl font-serif text-[#4a4a4a] italic whitespace-nowrap">{key}</h2>
-                    <div className="h-[1px] w-full bg-[#e2e2e2]" />
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {groupedPhotos[key].map((photo, idx) => (
-                      <motion.div
-                        key={photo.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        viewport={{ once: true }}
-                        className="aspect-square relative group cursor-pointer overflow-hidden rounded-3xl"
-                        onClick={() => setSelectedPhoto(photo)}
-                      >
-                        <img 
-                          src={photo.url} 
-                          alt="Memory" 
-                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                           <Maximize2 className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+        {isAdmin && (
+          <div className="flex justify-center flex-col items-center space-y-4">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="rounded-full bg-[#ff9a9e] hover:bg-[#ff8a8e] shadow-lg px-8 h-12">
+                  <Plus className="mr-2" size={18} /> Add Memory
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="rounded-3xl border-[#e2e2e2] bg-white">
+                <DialogHeader>
+                  <DialogTitle className="font-serif italic text-xl">Capture a Memory</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 pt-4">
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-[#8e8e8e]">Photo</label>
+                    <div className="border-2 border-dashed border-[#e2e2e2] rounded-2xl p-8 flex flex-col items-center justify-center space-y-4 hover:border-[#ff9a9e] transition-colors cursor-pointer relative overflow-hidden">
+                      <Input 
+                        type="file" 
+                        className="absolute inset-0 opacity-0 cursor-pointer" 
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                        accept="image/*"
+                      />
+                      {selectedFile ? (
+                        <div className="text-center">
+                          <ImageIcon className="mx-auto text-[#ff9a9e] mb-2" size={32} />
+                          <p className="text-sm text-[#4a4a4a] truncate max-w-[200px]">{selectedFile.name}</p>
                         </div>
-                        
-                        {isAdmin && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(photo);
-                            }}
-                            className="absolute top-3 right-3 p-2 bg-white/80 hover:bg-red-50 text-red-500 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                            disabled={deleting === photo.id}
-                          >
-                            {deleting === photo.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
-                          </button>
-                        )}
-                      </motion.div>
-                    ))}
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="mx-auto text-[#8e8e8e] mb-2" size={32} />
+                          <p className="text-sm text-[#8e8e8e]">Click or drag to upload</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </section>
-              ))
-            )}
-          </div>
-        </div>
 
-        {/* Full Screen Lightbox */}
-        <AnimatePresence>
-          {selectedPhoto && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 md:p-8"
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs uppercase tracking-widest text-[#8e8e8e]">Month</label>
+                      <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                        <SelectTrigger className="rounded-xl border-[#e2e2e2]">
+                          <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-[#e2e2e2]">
+                          {months.map(m => (
+                            <SelectItem key={m} value={m}>{m}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs uppercase tracking-widest text-[#8e8e8e]">Year</label>
+                      <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger className="rounded-xl border-[#e2e2e2]">
+                          <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-[#e2e2e2]">
+                          {[2020, 2021, 2022, 2023, 2024, 2025].map(y => (
+                            <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <Button 
+                    className="w-full h-12 bg-[#ff9a9e] hover:bg-[#ff8a8e] rounded-xl shadow-md text-white font-medium"
+                    onClick={handleUpload}
+                    disabled={uploading || !selectedFile}
+                  >
+                    {uploading ? <Loader2 className="animate-spin" /> : 'Save Memory'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-[#8e8e8e] hover:text-red-400"
+              onClick={() => {
+                localStorage.removeItem('is_admin');
+                setIsAdmin(false);
+                toast.info('Admin mode disabled');
+              }}
+            >
+              Disable Admin Mode
+            </Button>
+          </div>
+        )}
+
+        <div className="space-y-16">
+          {loading ? (
+            <div className="flex justify-center pt-20">
+              <Loader2 className="animate-spin text-[#ff9a9e]" size={32} />
+            </div>
+          ) : photos.length === 0 ? (
+             <div className="text-center py-20 space-y-4">
+                <ImageIcon className="mx-auto text-[#e2e2e2]" size={64} />
+                <p className="text-[#8e8e8e] font-serif italic">No memories captured yet...</p>
+             </div>
+          ) : (
+            groupKeys.map((key) => (
+              <section key={key} className="space-y-6">
+                <div className="flex items-center space-x-4">
+                  <h2 className="text-xl font-serif text-[#4a4a4a] italic whitespace-nowrap">{key}</h2>
+                  <div className="h-[1px] w-full bg-[#e2e2e2]" />
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {groupedPhotos[key].map((photo, idx) => (
+                    <motion.div
+                      key={photo.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      viewport={{ once: true }}
+                      className="aspect-square relative group cursor-pointer overflow-hidden rounded-3xl"
+                      onClick={() => setSelectedPhoto(photo)}
+                    >
+                      <img 
+                        src={photo.url} 
+                        alt="Memory" 
+                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                         <Maximize2 className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+                      </div>
+                      
+                      {isAdmin && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(photo);
+                          }}
+                          className="absolute top-3 right-3 p-2 bg-white/80 hover:bg-red-50 text-red-500 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={deleting === photo.id}
+                        >
+                          {deleting === photo.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                        </button>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+            ))
+          )}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 md:p-8"
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <button 
+              className="absolute top-6 right-6 text-white/70 hover:text-white"
               onClick={() => setSelectedPhoto(null)}
             >
-              <button 
-                className="absolute top-6 right-6 text-white/70 hover:text-white"
-                onClick={() => setSelectedPhoto(null)}
-              >
-                <X size={32} />
-              </button>
-              
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="relative max-w-full max-h-full flex flex-col items-center"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <img 
-                  src={selectedPhoto.url} 
-                  alt="Full memory" 
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-                />
-                <div className="mt-6 text-center text-white space-y-1">
-                  <p className="font-serif italic text-xl">{selectedPhoto.month} {selectedPhoto.year}</p>
-                  <p className="text-white/50 text-xs uppercase tracking-widest">A captured moment together</p>
-                </div>
-              </motion.div>
+              <X size={32} />
+            </button>
+            
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-full max-h-full flex flex-col items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={selectedPhoto.url} 
+                alt="Full memory" 
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              />
+              <div className="mt-6 text-center text-white space-y-1">
+                <p className="font-serif italic text-xl">{selectedPhoto.month} {selectedPhoto.year}</p>
+                <p className="text-white/50 text-xs uppercase tracking-widest">A captured moment together</p>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

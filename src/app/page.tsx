@@ -236,13 +236,13 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="flex flex-col items-center space-y-6">
-            <Link href="/ours">
-              <Button size="xl" className="rounded-full bg-white text-black hover:bg-slate-200 border-none shadow-[0_0_30px_rgba(255,255,255,0.2)] px-12 h-16 text-lg font-medium group">
-                Explore Memories
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
+            <div className="flex flex-col items-center space-y-6">
+              <Link href="/memories">
+                <Button size="xl" className="rounded-full bg-white text-black hover:bg-slate-200 border-none shadow-[0_0_30px_rgba(255,255,255,0.2)] px-12 h-16 text-lg font-medium group">
+                  Explore Memories
+                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2 text-slate-500 text-xs tracking-widest uppercase">

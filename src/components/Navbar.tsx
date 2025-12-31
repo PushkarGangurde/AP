@@ -3,14 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Image as ImageIcon, User, Heart } from 'lucide-react';
+import { Home, Image as ImageIcon, Mars, Venus, Dumbbell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Home', href: '/', icon: Home },
-  { label: 'Ours', href: '/ours', icon: ImageIcon },
-  { label: 'Tanu', href: '/tanu', icon: Heart },
-  { label: 'Pushkar', href: '/pushkar', icon: User },
+  { label: 'Memories', href: '/memories', icon: ImageIcon },
+  { label: 'Tanu', href: '/tanu', icon: Venus },
+  { label: 'Pushkar', href: '/pushkar', icon: Mars },
+  { label: 'MOVE', href: '/move', icon: Dumbbell },
 ];
 
 export function Navbar() {

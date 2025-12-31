@@ -127,7 +127,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     };
   }, [text, image, repetitions, speed]);
 
-  const handleMouseEnter = (ev: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleMouseEnter = (ev: React.MouseEvent<HTMLDivElement>) => {
     if (!itemRef.current || !marqueeRef.current || !marqueeInnerRef.current) return;
     const rect = itemRef.current.getBoundingClientRect();
     const edge = findClosestEdge(ev.clientX - rect.left, ev.clientY - rect.top, rect.width, rect.height);
@@ -139,7 +139,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
       .to([marqueeRef.current, marqueeInnerRef.current], { y: '0%' }, 0);
   };
 
-  const handleMouseLeave = (ev: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleMouseLeave = (ev: React.MouseEvent<HTMLDivElement>) => {
     if (!itemRef.current || !marqueeRef.current || !marqueeInnerRef.current) return;
     const rect = itemRef.current.getBoundingClientRect();
     const edge = findClosestEdge(ev.clientX - rect.left, ev.clientY - rect.top, rect.width, rect.height);
@@ -156,15 +156,15 @@ const MenuItem: React.FC<MenuItemProps> = ({
       ref={itemRef}
       style={{ borderTop: isFirst ? 'none' : `1px solid ${borderColor}` }}
     >
-      <a
+      <div
         className="flex items-center justify-center h-full min-h-[100px] relative cursor-pointer uppercase no-underline font-semibold text-[4vh]"
-        href={link}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleMouseEnter}
         style={{ color: textColor }}
       >
         {text}
-      </a>
+      </div>
       <div
         className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none translate-y-[101%]"
         ref={marqueeRef}

@@ -75,6 +75,10 @@ export default function MemoriesPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   
+  // Triple-tap state
+  const [clickCount, setClickCount] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
+
   // Admin Dialog State
   const [showAdminDialog, setShowAdminDialog] = useState(false);
   const [adminCodeInput, setAdminCodeInput] = useState('');
@@ -90,6 +94,22 @@ export default function MemoriesPage() {
     fetchPhotos();
     setIsAdmin(localStorage.getItem('is_admin') === 'true');
   }, []);
+
+  const handleTripleTap = () => {
+    const now = Date.now();
+    if (now - lastClickTime < 500) {
+      const newCount = clickCount + 1;
+      if (newCount >= 3) {
+        handleAdminToggle();
+        setClickCount(0);
+      } else {
+        setClickCount(newCount);
+      }
+    } else {
+      setClickCount(1);
+    }
+    setLastClickTime(now);
+  };
 
   const fetchPhotos = async () => {
     try {
@@ -167,20 +187,10 @@ export default function MemoriesPage() {
     : tempItems;
 
   return (
-    <div className="min-h-screen bg-black overflow-hidden flex flex-col">
-      {/* Header with Admin Toggle */}
-      <header className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-2">
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          onClick={handleAdminToggle}
-          className="w-10 h-10 glass rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,255,255,0.3)]"
-        >
-          <ImageIcon className="text-[#00ffff]" size={20} />
-        </motion.div>
-        <h1 className="text-xl font-sans text-white/50 tracking-widest uppercase text-xs">Shared Memories</h1>
-      </header>
-
+    <div 
+      className="min-h-screen bg-black overflow-hidden flex flex-col"
+      onClick={handleTripleTap}
+    >
       {/* Admin Controls Overlay */}
       <div className="fixed top-32 left-1/2 -translate-x-1/2 z-50">
         {isAdmin && (

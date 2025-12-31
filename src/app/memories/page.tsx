@@ -171,7 +171,7 @@ export default function MemoriesPage() {
         ) : (
           <InfiniteMenu 
             items={menuItems} 
-            scale={0.8} 
+            scale={1.2} 
             onDoubleClick={handleFullscreen}
           />
         )}

@@ -28,22 +28,12 @@ void main() {
     vec3 centerPos = (uWorldMatrix * aInstanceMatrix * vec4(0., 0., 0., 1.)).xyz;
     float radius = length(centerPos.xyz);
 
-    if (gl_VertexID > 0) {
-        vec3 rotationAxis = uRotationAxisVelocity.xyz;
-        float rotationVelocity = min(.15, uRotationAxisVelocity.w * 15.);
-        vec3 stretchDir = normalize(cross(centerPos, rotationAxis));
-        vec3 relativeVertexPos = normalize(worldPosition.xyz - centerPos);
-        float strength = dot(stretchDir, relativeVertexPos);
-        float invAbsStrength = min(0., abs(strength) - 1.);
-        strength = rotationVelocity * sign(strength) * abs(invAbsStrength * invAbsStrength * invAbsStrength + 1.);
-        worldPosition.xyz += stretchDir * strength;
-    }
-
+    // Subtle stretch effect removed to prevent distortion
     worldPosition.xyz = radius * normalize(worldPosition.xyz);
 
     gl_Position = uProjectionMatrix * uViewMatrix * worldPosition;
 
-    vAlpha = smoothstep(0.5, 1., normalize(worldPosition.xyz).z) * .9 + .1;
+    vAlpha = smoothstep(0.4, 1., normalize(worldPosition.xyz).z) * .9 + .1;
     vUvs = aModelUvs;
     vInstanceId = gl_InstanceID;
 }
@@ -69,7 +59,8 @@ void main() {
     int cellY = itemIndex / cellsPerRow;
     vec2 cellSize = vec2(1.0) / vec2(float(cellsPerRow));
     vec2 cellOffset = vec2(float(cellX), float(cellY)) * cellSize;
-    
+
+    // Direct mapping since atlas is already "cover" scaled
     vec2 st = vec2(vUvs.x, 1.0 - vUvs.y);
     st = st * cellSize + cellOffset;
     
@@ -313,352 +304,25 @@ class IcosahedronGeometry extends Geometry {
   }
 }
 
-class DiscGeometry extends Geometry {
-  constructor(steps = 4, radius = 1) {
+class PlaneGeometry extends Geometry {
+  constructor(width = 1, height = 1) {
     super();
-    const safeSteps = Math.max(4, steps);
-    const alpha = (2 * Math.PI) / safeSteps;
+    const w2 = width / 2;
+    const h2 = height / 2;
 
-    this.addVertex(0, 0, 0);
-    this.lastVertex.uv[0] = 0.5;
-    this.lastVertex.uv[1] = 0.5;
+    this.addVertex(-w2, h2, 0);  // 0: TL
+    this.addVertex(w2, h2, 0);   // 1: TR
+    this.addVertex(-w2, -h2, 0); // 2: BL
+    this.addVertex(w2, -h2, 0);  // 3: BR
 
-    for (let i = 0; i < safeSteps; ++i) {
-      const x = Math.cos(alpha * i);
-      const y = Math.sin(alpha * i);
-      this.addVertex(radius * x, radius * y, 0);
-      this.lastVertex.uv[0] = x * 0.5 + 0.5;
-      this.lastVertex.uv[1] = y * 0.5 + 0.5;
+    this.vertices[0].uv[0] = 0; this.vertices[0].uv[1] = 1;
+    this.vertices[1].uv[0] = 1; this.vertices[1].uv[1] = 1;
+    this.vertices[2].uv[0] = 0; this.vertices[2].uv[1] = 0;
+    this.vertices[3].uv[0] = 1; this.vertices[3].uv[1] = 0;
 
-      if (i > 0) {
-        this.addFace(0, i, i + 1);
-      }
-    }
-    this.addFace(0, safeSteps, 1);
+    this.addFace(0, 2, 1);
+    this.addFace(1, 2, 3);
   }
-}
-
-function createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
-  const shader = gl.createShader(type);
-  if (!shader) return null;
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-
-  if (success) {
-    return shader;
-  }
-
-  console.error(gl.getShaderInfoLog(shader));
-  gl.deleteShader(shader);
-  return null;
-}
-
-function createProgram(
-  gl: WebGL2RenderingContext,
-  shaderSources: [string, string],
-  transformFeedbackVaryings?: string[] | null,
-  attribLocations?: Record<string, number>
-): WebGLProgram | null {
-  const program = gl.createProgram();
-  if (!program) return null;
-
-  [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER].forEach((type, ndx) => {
-    const shader = createShader(gl, type, shaderSources[ndx]);
-    if (shader) {
-      gl.attachShader(program, shader);
-    }
-  });
-
-  if (transformFeedbackVaryings) {
-    gl.transformFeedbackVaryings(program, transformFeedbackVaryings, gl.SEPARATE_ATTRIBS);
-  }
-
-  if (attribLocations) {
-    for (const attrib in attribLocations) {
-      if (Object.prototype.hasOwnProperty.call(attribLocations, attrib)) {
-        gl.bindAttribLocation(program, attribLocations[attrib], attrib);
-      }
-    }
-  }
-
-  gl.linkProgram(program);
-  const success = gl.getProgramParameter(program, gl.LINK_STATUS);
-
-  if (success) {
-    return program;
-  }
-
-  console.error(gl.getProgramInfoLog(program));
-  gl.deleteProgram(program);
-  return null;
-}
-
-function makeVertexArray(
-  gl: WebGL2RenderingContext,
-  bufLocNumElmPairs: Array<[WebGLBuffer, number, number]>,
-  indices?: Uint16Array
-): WebGLVertexArrayObject | null {
-  const va = gl.createVertexArray();
-  if (!va) return null;
-
-  gl.bindVertexArray(va);
-
-  for (const [buffer, loc, numElem] of bufLocNumElmPairs) {
-    if (loc === -1) continue;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, numElem, gl.FLOAT, false, 0, 0);
-  }
-
-  if (indices) {
-    const indexBuffer = gl.createBuffer();
-    if (indexBuffer) {
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    }
-  }
-
-  gl.bindVertexArray(null);
-  return va;
-}
-
-function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement): boolean {
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const displayWidth = Math.round(canvas.clientWidth * dpr);
-  const displayHeight = Math.round(canvas.clientHeight * dpr);
-  const needResize = canvas.width !== displayWidth || canvas.height !== displayHeight;
-  if (needResize) {
-    canvas.width = displayWidth;
-    canvas.height = displayHeight;
-  }
-  return needResize;
-}
-
-function makeBuffer(gl: WebGL2RenderingContext, sizeOrData: number | ArrayBufferView, usage: number): WebGLBuffer {
-  const buf = gl.createBuffer();
-  if (!buf) {
-    throw new Error('Failed to create WebGL buffer.');
-  }
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-
-  if (typeof sizeOrData === 'number') {
-    gl.bufferData(gl.ARRAY_BUFFER, sizeOrData, usage);
-  } else {
-    gl.bufferData(gl.ARRAY_BUFFER, sizeOrData, usage);
-  }
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  return buf;
-}
-
-function createAndSetupTexture(
-  gl: WebGL2RenderingContext,
-  minFilter: number,
-  magFilter: number,
-  wrapS: number,
-  wrapT: number
-): WebGLTexture {
-  const texture = gl.createTexture();
-  if (!texture) {
-    throw new Error('Failed to create WebGL texture.');
-  }
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
-  return texture;
-}
-
-type UpdateCallback = (deltaTime: number) => void;
-
-class ArcballControl {
-  private canvas: HTMLCanvasElement;
-  private updateCallback: UpdateCallback;
-  private eventListeners: Array<{ type: string; handler: (e: any) => void }> = [];
-
-  public isPointerDown = false;
-  public orientation = quat.create();
-  public pointerRotation = quat.create();
-  public rotationVelocity = 0;
-  public rotationAxis = vec3.fromValues(1, 0, 0);
-
-  public snapDirection = vec3.fromValues(0, 0, -1);
-  public snapTargetDirection: vec3 | null = null;
-
-  private pointerPos = vec2.create();
-  private previousPointerPos = vec2.create();
-  private _rotationVelocity = 0;
-  private _combinedQuat = quat.create();
-
-  private readonly EPSILON = 0.1;
-  private readonly IDENTITY_QUAT = quat.create();
-
-  constructor(canvas: HTMLCanvasElement, updateCallback?: UpdateCallback) {
-    this.canvas = canvas;
-    this.updateCallback = updateCallback || (() => undefined);
-
-    const onPointerDown = (e: PointerEvent) => {
-      vec2.set(this.pointerPos, e.clientX, e.clientY);
-      vec2.copy(this.previousPointerPos, this.pointerPos);
-      this.isPointerDown = true;
-    };
-    const onPointerUp = () => {
-      this.isPointerDown = false;
-    };
-    const onPointerLeave = () => {
-      this.isPointerDown = false;
-    };
-    const onPointerMove = (e: PointerEvent) => {
-      if (this.isPointerDown) {
-        vec2.set(this.pointerPos, e.clientX, e.clientY);
-      }
-    };
-
-    canvas.addEventListener('pointerdown', onPointerDown);
-    canvas.addEventListener('pointerup', onPointerUp);
-    canvas.addEventListener('pointerleave', onPointerLeave);
-    canvas.addEventListener('pointermove', onPointerMove);
-
-    this.eventListeners.push(
-      { type: 'pointerdown', handler: onPointerDown },
-      { type: 'pointerup', handler: onPointerUp },
-      { type: 'pointerleave', handler: onPointerLeave },
-      { type: 'pointermove', handler: onPointerMove }
-    );
-
-    canvas.style.touchAction = 'none';
-  }
-
-  public destroy(): void {
-    this.eventListeners.forEach(({ type, handler }) => {
-      this.canvas.removeEventListener(type, handler);
-    });
-    this.eventListeners = [];
-  }
-
-  public update(deltaTime: number, targetFrameDuration = 16): void {
-    const timeScale = deltaTime / targetFrameDuration + 0.00001;
-    let angleFactor = timeScale;
-    const snapRotation = quat.create();
-
-    if (this.isPointerDown) {
-      const INTENSITY = 0.3 * timeScale;
-      const ANGLE_AMPLIFICATION = 5 / timeScale;
-      const midPointerPos = vec2.sub(vec2.create(), this.pointerPos, this.previousPointerPos);
-      vec2.scale(midPointerPos, midPointerPos, INTENSITY);
-
-      if (vec2.sqrLen(midPointerPos) > this.EPSILON) {
-        vec2.add(midPointerPos, this.previousPointerPos, midPointerPos);
-
-        const p = this.project(midPointerPos);
-        const q = this.project(this.previousPointerPos);
-        const a = vec3.normalize(vec3.create(), p);
-        const b = vec3.normalize(vec3.create(), q);
-
-        vec2.copy(this.previousPointerPos, midPointerPos);
-
-        angleFactor *= ANGLE_AMPLIFICATION;
-
-        this.quatFromVectors(a, b, this.pointerRotation, angleFactor);
-      } else {
-        quat.slerp(this.pointerRotation, this.pointerRotation, this.IDENTITY_QUAT, INTENSITY);
-      }
-    } else {
-      const INTENSITY = 0.1 * timeScale;
-      quat.slerp(this.pointerRotation, this.pointerRotation, this.IDENTITY_QUAT, INTENSITY);
-
-      if (this.snapTargetDirection) {
-        const SNAPPING_INTENSITY = 0.2;
-        const a = this.snapTargetDirection;
-        const b = this.snapDirection;
-        const sqrDist = vec3.squaredDistance(a, b);
-        const distanceFactor = Math.max(0.1, 1 - sqrDist * 10);
-        angleFactor *= SNAPPING_INTENSITY * distanceFactor;
-        this.quatFromVectors(a, b, snapRotation, angleFactor);
-      }
-    }
-
-    const combinedQuat = quat.multiply(quat.create(), snapRotation, this.pointerRotation);
-    this.orientation = quat.multiply(quat.create(), combinedQuat, this.orientation);
-    quat.normalize(this.orientation, this.orientation);
-
-    const RA_INTENSITY = 0.8 * timeScale;
-    quat.slerp(this._combinedQuat, this._combinedQuat, combinedQuat, RA_INTENSITY);
-    quat.normalize(this._combinedQuat, this._combinedQuat);
-
-    const rad = Math.acos(this._combinedQuat[3]) * 2.0;
-    const s = Math.sin(rad / 2.0);
-    let rv = 0;
-    if (s > 0.000001) {
-      rv = rad / (2 * Math.PI);
-      this.rotationAxis[0] = this._combinedQuat[0] / s;
-      this.rotationAxis[1] = this._combinedQuat[1] / s;
-      this.rotationAxis[2] = this._combinedQuat[2] / s;
-    }
-
-    const RV_INTENSITY = 0.5 * timeScale;
-    this._rotationVelocity += (rv - this._rotationVelocity) * RV_INTENSITY;
-    this.rotationVelocity = this._rotationVelocity / timeScale;
-
-    this.updateCallback(deltaTime);
-  }
-
-  private quatFromVectors(a: vec3, b: vec3, out: quat, angleFactor = 1): { q: quat; axis: vec3; angle: number } {
-    const axis = vec3.cross(vec3.create(), a, b);
-    vec3.normalize(axis, axis);
-    const d = Math.max(-1, Math.min(1, vec3.dot(a, b)));
-    const angle = Math.acos(d) * angleFactor;
-    quat.setAxisAngle(out, axis, angle);
-    return { q: out, axis, angle };
-  }
-
-  private project(pos: vec2): vec3 {
-    const r = 2;
-    const w = this.canvas.clientWidth;
-    const h = this.canvas.clientHeight;
-    const s = Math.max(w, h) - 1;
-
-    const x = (2 * pos[0] - w - 1) / s;
-    const y = (2 * pos[1] - h - 1) / s;
-    let z = 0;
-    const xySq = x * x + y * y;
-    const rSq = r * r;
-
-    if (xySq <= rSq / 2.0) {
-      z = Math.sqrt(rSq - xySq);
-    } else {
-      z = rSq / Math.sqrt(xySq);
-    }
-    return vec3.fromValues(-x, y, z);
-  }
-}
-
-export interface MenuItem {
-  image: string;
-  link: string;
-  title: string;
-  description: string;
-}
-
-type ActiveItemCallback = (index: number) => void;
-type MovementChangeCallback = (isMoving: boolean) => void;
-type InitCallback = (instance: InfiniteGridMenu) => void;
-
-interface Camera {
-  matrix: mat4;
-  near: number;
-  far: number;
-  fov: number;
-  aspect: number;
-  position: vec3;
-  up: vec3;
-  matrices: {
-    view: mat4;
-    projection: mat4;
-    inversProjection: mat4;
-  };
 }
 
 class InfiniteGridMenu {
@@ -672,7 +336,7 @@ class InfiniteGridMenu {
     uvs: Float32Array;
   };
   private icoGeo!: IcosahedronGeometry;
-  private discGeo!: DiscGeometry;
+  private discGeo!: PlaneGeometry;
   private worldMatrix = mat4.create();
   private tex: WebGLTexture | null = null;
   private control!: ArcballControl;
@@ -829,7 +493,7 @@ class InfiniteGridMenu {
       uAtlasSize: gl.getUniformLocation(this.discProgram!, 'uAtlasSize')
     };
 
-    this.discGeo = new DiscGeometry(56, 1);
+    this.discGeo = new PlaneGeometry(1, 1);
     this.discBuffers = this.discGeo.data;
     this.discVAO = makeVertexArray(
       gl,
@@ -871,47 +535,40 @@ class InfiniteGridMenu {
     canvas.width = this.atlasSize * cellSize;
     canvas.height = this.atlasSize * cellSize;
 
-      Promise.all(
-        this.items.map(
-          item =>
-            new Promise<HTMLImageElement>(resolve => {
-              const img = new Image();
-              img.crossOrigin = 'anonymous';
-              img.onload = () => resolve(img);
-              img.src = item.image;
-            })
-        )
-      ).then(images => {
-        images.forEach((img, i) => {
-          const x = (i % this.atlasSize) * cellSize;
-          const y = Math.floor(i / this.atlasSize) * cellSize;
-          
-          // Cover fit logic
-          const imgRatio = img.width / img.height;
-          const cellRatio = 1; // cellSize / cellSize
-          let drawWidth, drawHeight, offsetX, offsetY;
+    Promise.all(
+      this.items.map(
+        item =>
+          new Promise<HTMLImageElement>(resolve => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => resolve(img);
+            img.src = item.image;
+          })
+      )
+    ).then(images => {
+      images.forEach((img, i) => {
+        const x = (i % this.atlasSize) * cellSize;
+        const y = Math.floor(i / this.atlasSize) * cellSize;
+        
+        // DRAW AS COVER to prevent squashing
+        const imgAspect = img.width / img.height;
+        let drawW = cellSize;
+        let drawH = cellSize;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        if (imgAspect > 1) { // Landscape
+          drawW = cellSize * imgAspect;
+          offsetX = -(drawW - cellSize) / 2;
+        } else { // Portrait
+          drawH = cellSize / imgAspect;
+          offsetY = -(drawH - cellSize) / 2;
+        }
+        
+        ctx.drawImage(img, x + offsetX, y + offsetY, drawW, drawH);
+      });
 
-          if (imgRatio > cellRatio) {
-            drawHeight = cellSize;
-            drawWidth = cellSize * imgRatio;
-            offsetX = -(drawWidth - cellSize) / 2;
-            offsetY = 0;
-          } else {
-            drawWidth = cellSize;
-            drawHeight = cellSize / imgRatio;
-            offsetX = 0;
-            offsetY = -(drawHeight - cellSize) / 2;
-          }
-
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(x, y, cellSize, cellSize);
-          ctx.clip();
-          ctx.drawImage(img, x + offsetX, y + offsetY, drawWidth, drawHeight);
-          ctx.restore();
-        });
-
-        gl.bindTexture(gl.TEXTURE_2D, this.tex);
+      gl.bindTexture(gl.TEXTURE_2D, this.tex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
       gl.generateMipmap(gl.TEXTURE_2D);
     });
@@ -956,7 +613,7 @@ class InfiniteGridMenu {
     this.control.update(deltaTime, this.TARGET_FRAME_DURATION);
 
     const positions = this.instancePositions.map(p => vec3.transformQuat(vec3.create(), p, this.control.orientation));
-    const scale = 0.45;
+    const scale = 0.25;
     const SCALE_INTENSITY = 0.6;
 
     positions.forEach((p, ndx) => {
@@ -1037,7 +694,7 @@ class InfiniteGridMenu {
     if (!this.gl) return;
     const canvasEl = this.gl.canvas as HTMLCanvasElement;
     this.camera.aspect = canvasEl.clientWidth / canvasEl.clientHeight;
-    const height = this.SPHERE_RADIUS * 0.35;
+    const height = this.SPHERE_RADIUS * 0.5;
     const distance = this.camera.position[2];
     if (this.camera.aspect > 1) {
       this.camera.fov = 2 * Math.atan(height / distance);

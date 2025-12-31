@@ -3,6 +3,237 @@
 import { FC, useRef, useState, useEffect, MutableRefObject } from 'react';
 import { mat4, quat, vec2, vec3 } from 'gl-matrix';
 
+// --- Types & Interfaces ---
+
+export interface MenuItem {
+  image: string;
+  link: string;
+  title: string;
+  description: string;
+}
+
+export interface Camera {
+  matrix: mat4;
+  near: number;
+  far: number;
+  fov: number;
+  aspect: number;
+  position: vec3;
+  up: vec3;
+  matrices: {
+    view: mat4;
+    projection: mat4;
+    inversProjection: mat4;
+  };
+}
+
+export type ActiveItemCallback = (index: number) => void;
+export type MovementChangeCallback = (isMoving: boolean) => void;
+export type InitCallback = (instance: InfiniteGridMenu) => void;
+
+// --- WebGL Utilities ---
+
+function createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
+  const shader = gl.createShader(type);
+  if (!shader) throw new Error('Could not create shader');
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const info = gl.getShaderInfoLog(shader);
+    gl.deleteShader(shader);
+    throw new Error('Could not compile shader: ' + info);
+  }
+  return shader;
+}
+
+function createProgram(
+  gl: WebGL2RenderingContext,
+  sources: [string, string],
+  transformFeedbackVaryings: string[] | null = null,
+  attributionLocations: Record<string, number> | null = null
+): WebGLProgram {
+  const program = gl.createProgram();
+  if (!program) throw new Error('Could not create program');
+  
+  const [vsSource, fsSource] = sources;
+  const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+  
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  
+  if (transformFeedbackVaryings) {
+    gl.transformFeedbackVaryings(program, transformFeedbackVaryings, gl.INTERLEAVED_ATTRIBS);
+  }
+  
+  if (attributionLocations) {
+    for (const [name, location] of Object.entries(attributionLocations)) {
+      gl.bindAttribLocation(program, location, name);
+    }
+  }
+  
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const info = gl.getProgramInfoLog(program);
+    gl.deleteProgram(program);
+    throw new Error('Could not link program: ' + info);
+  }
+  return program;
+}
+
+function makeBuffer(gl: WebGL2RenderingContext, data: BufferSource, usage: number): WebGLBuffer {
+  const buffer = gl.createBuffer();
+  if (!buffer) throw new Error('Could not create buffer');
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, data, usage);
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  return buffer;
+}
+
+function makeVertexArray(
+  gl: WebGL2RenderingContext,
+  attribs: [WebGLBuffer, number, number][],
+  indices: Uint16Array | null = null
+): WebGLVertexArrayObject {
+  const vao = gl.createVertexArray();
+  if (!vao) throw new Error('Could not create VAO');
+  gl.bindVertexArray(vao);
+  
+  for (const [buffer, location, size] of attribs) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.enableVertexAttribArray(location);
+    gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
+  }
+  
+  if (indices) {
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  }
+  
+  gl.bindVertexArray(null);
+  return vao;
+}
+
+function createAndSetupTexture(
+  gl: WebGL2RenderingContext,
+  minFilter: number,
+  magFilter: number,
+  wrapS: number,
+  wrapT: number
+): WebGLTexture {
+  const texture = gl.createTexture();
+  if (!texture) throw new Error('Could not create texture');
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT);
+  return texture;
+}
+
+function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement): boolean {
+  const dpr = window.devicePixelRatio || 1;
+  const displayWidth = Math.floor(canvas.clientWidth * dpr);
+  const displayHeight = Math.floor(canvas.clientHeight * dpr);
+  const needResize = canvas.width !== displayWidth || canvas.height !== displayHeight;
+  if (needResize) {
+    canvas.width = displayWidth;
+    canvas.height = displayHeight;
+  }
+  return needResize;
+}
+
+// --- Interaction Control ---
+
+class ArcballControl {
+  public orientation = quat.create();
+  public rotationVelocity = 0;
+  public rotationAxis = vec3.fromValues(1, 0, 0);
+  public isPointerDown = false;
+  public snapDirection = vec3.fromValues(0, 0, 1);
+  public snapTargetDirection = vec3.fromValues(0, 0, 1);
+
+  private lastMousePos = vec2.create();
+  private mousePos = vec2.create();
+  private velocity = 0;
+  private axis = vec3.fromValues(1, 0, 0);
+
+  constructor(private canvas: HTMLCanvasElement, private onUpdate: (dt: number) => void) {
+    canvas.addEventListener('pointerdown', this.onPointerDown);
+    window.addEventListener('pointermove', this.onPointerMove);
+    window.addEventListener('pointerup', this.onPointerUp);
+  }
+
+  public destroy(): void {
+    this.canvas.removeEventListener('pointerdown', this.onPointerDown);
+    window.removeEventListener('pointermove', this.onPointerMove);
+    window.removeEventListener('pointerup', this.onPointerUp);
+  }
+
+  private onPointerDown = (e: PointerEvent) => {
+    this.isPointerDown = true;
+    vec2.set(this.lastMousePos, e.clientX, e.clientY);
+    vec2.set(this.mousePos, e.clientX, e.clientY);
+  };
+
+  private onPointerMove = (e: PointerEvent) => {
+    if (!this.isPointerDown) return;
+    vec2.set(this.mousePos, e.clientX, e.clientY);
+  };
+
+  private onPointerUp = () => {
+    this.isPointerDown = false;
+  };
+
+  public update(dt: number, targetFrameDuration: number): void {
+    const timeScale = dt / targetFrameDuration + 0.0001;
+
+    if (this.isPointerDown) {
+      const dx = this.mousePos[0] - this.lastMousePos[0];
+      const dy = this.mousePos[1] - this.lastMousePos[1];
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > 0) {
+        this.axis[0] = dy / dist;
+        this.axis[1] = dx / dist;
+        this.axis[2] = 0;
+        this.velocity = dist * 0.005;
+      } else {
+        this.velocity *= Math.pow(0.8, timeScale);
+      }
+      
+      vec2.copy(this.lastMousePos, this.mousePos);
+    } else {
+      // Snapping logic
+      const dot = vec3.dot(this.snapDirection, this.snapTargetDirection);
+      const angle = Math.acos(Math.min(1, Math.max(-1, dot)));
+      if (angle > 0.001) {
+        const cross = vec3.cross(vec3.create(), this.snapDirection, this.snapTargetDirection);
+        vec3.normalize(cross, cross);
+        const snapVelocity = angle * 0.1;
+        this.velocity += (snapVelocity - this.velocity) * 0.2 * timeScale;
+        vec3.copy(this.axis, cross);
+      } else {
+        this.velocity *= Math.pow(0.8, timeScale);
+      }
+    }
+
+    this.rotationVelocity = this.velocity;
+    vec3.copy(this.rotationAxis, this.axis);
+
+    const q = quat.setAxisAngle(quat.create(), this.axis, this.velocity * timeScale);
+    quat.multiply(this.orientation, q, this.orientation);
+    quat.normalize(this.orientation, this.orientation);
+
+    vec3.transformQuat(this.snapDirection, [0, 0, 1], this.orientation);
+    
+    this.onUpdate(dt);
+  }
+}
+
+// --- Main Menu Class ---
+
 const discVertShaderSource = `#version 300 es
 
 uniform mat4 uWorldMatrix;
@@ -325,7 +556,7 @@ class PlaneGeometry extends Geometry {
   }
 }
 
-class InfiniteGridMenu {
+export class InfiniteGridMenu {
   private gl: WebGL2RenderingContext | null = null;
   private discProgram: WebGLProgram | null = null;
   private discVAO: WebGLVertexArrayObject | null = null;
@@ -776,7 +1007,7 @@ interface InfiniteMenuProps {
   onDoubleClick?: (item: MenuItem) => void;
 }
 
-export function InfiniteMenu({ items = [], scale = 1.0, onDoubleClick }: InfiniteMenuProps) {
+export const InfiniteMenu: FC<InfiniteMenuProps> = ({ items = [], scale = 1.0, onDoubleClick }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null) as MutableRefObject<HTMLCanvasElement | null>;
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const sketchRef = useRef<InfiniteGridMenu | null>(null);
@@ -834,4 +1065,4 @@ export function InfiniteMenu({ items = [], scale = 1.0, onDoubleClick }: Infinit
       />
     </div>
   );
-}
+};

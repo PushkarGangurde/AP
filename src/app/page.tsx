@@ -13,6 +13,8 @@ import FlowingMenu from '@/components/FlowingMenu';
 
 const START_DATE = new Date(2020, 0, 7); // Jan 7, 2020
 
+const formatNumber = (num: number | undefined) => String(num ?? 0).padStart(2, '0');
+
 const PLACES_TO_VISIT = [
   { link: '#', text: 'Paris', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1000' },
   { link: '#', text: 'Bali', image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=1000' },
@@ -141,19 +143,39 @@ export default function HomePage() {
               <span className="text-[10px] uppercase tracking-[0.3em] text-green-300 font-medium">since jan 2020</span>
             </motion.div>
 
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-4 w-full max-w-3xl">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-6 w-full max-w-4xl px-4">
               {timeUnits.map((unit, index) => (
                 <motion.div
                   key={unit.label}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1, duration: 0.8 }}
                   className="relative group"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-green-500/20 to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-white/5 border border-white/10 backdrop-blur-xl p-4 rounded-2xl flex flex-col items-center justify-center transition-all group-hover:bg-white/10 group-hover:-translate-y-1">
-                    <span className="text-3xl font-sans text-white">{unit.value ?? 0}</span>
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-slate-500 mt-1">{unit.label}</span>
+                  {/* Premium Glow Effect */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-b from-white/20 to-transparent rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                  
+                  <div className="relative flex flex-col items-center justify-center bg-black/40 border border-white/10 backdrop-blur-2xl rounded-2xl py-6 px-2 transition-all duration-300 group-hover:border-white/20 group-hover:bg-black/60">
+                    
+                    {/* Number with transition */}
+                    <div className="overflow-hidden h-12 flex items-center justify-center">
+                      <motion.span
+                        key={unit.value} // Key triggers animation on change
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="text-4xl md:text-5xl font-mono font-extralight tracking-tighter text-white"
+                      >
+                        {formatNumber(unit.value)}
+                      </motion.span>
+                    </div>
+
+                    {/* Label */}
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-2 font-medium">
+                      {unit.label}
+                    </span>
+                    
+                    {/* Subtle Decorative Line */}
+                    <div className="w-4 h-[1px] bg-white/10 mt-3 group-hover:w-8 transition-all duration-500" />
                   </div>
                 </motion.div>
               ))}

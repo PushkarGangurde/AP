@@ -46,12 +46,12 @@ export function Navbar() {
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
-                  <Icon 
-                    size={20} 
-                    className="mb-1" 
-                    stroke={isActive ? "url(#aurora-gradient)" : "currentColor"} 
-                    strokeWidth={isActive ? 2.5 : 2}
-                  />
+                    <Icon 
+                      size={24} 
+                      strokeWidth={2.5}
+                      className="mb-1 overflow-visible" 
+                      stroke={isActive ? "url(#aurora-gradient)" : "currentColor"} 
+                    />
                   <span className="text-[10px] font-medium uppercase tracking-wider">{item.label}</span>
                 </motion.div>
               </Link>

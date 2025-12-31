@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Heart, Sparkles, Clock } from 'lucide-react';
 
-export default function PushkarPage() {
+export default function KichkuPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-8 bg-black">
         <motion.div
@@ -15,7 +15,7 @@ export default function PushkarPage() {
         </motion.div>
         
         <div className="space-y-4">
-          <h1 className="text-4xl font-sans text-white">Pushkar's Space</h1>
+          <h1 className="text-4xl font-sans text-white">Kichku's Space</h1>
           <p className="text-slate-400 max-w-md mx-auto">
             A dedicated corner for his thoughts, projects, and favorite things. Coming soon...
           </p>

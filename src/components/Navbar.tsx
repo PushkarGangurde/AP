@@ -10,7 +10,7 @@ const navItems = [
   { label: 'Home', href: '/', icon: Home },
   { label: 'Memories', href: '/memories', icon: ImageIcon },
   { label: 'Tanu', href: '/tanu', icon: Venus },
-  { label: 'Pushkar', href: '/pushkar', icon: Mars },
+  { label: 'Kichku', href: '/kichku', icon: Mars },
   { label: 'MOVE', href: '/move', icon: Dumbbell },
 ];
 
@@ -50,6 +50,7 @@ export function Navbar() {
                     size={20} 
                     className="mb-1" 
                     stroke={isActive ? "url(#aurora-gradient)" : "currentColor"} 
+                    strokeWidth={isActive ? 2.5 : 2}
                   />
                   <span className="text-[10px] font-medium uppercase tracking-wider">{item.label}</span>
                 </motion.div>

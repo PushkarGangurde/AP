@@ -69,18 +69,8 @@ void main() {
     int cellY = itemIndex / cellsPerRow;
     vec2 cellSize = vec2(1.0) / vec2(float(cellsPerRow));
     vec2 cellOffset = vec2(float(cellX), float(cellY)) * cellSize;
-
-    ivec2 texSize = textureSize(uTex, 0);
-    float imageAspect = float(texSize.x) / float(texSize.y);
-    float containerAspect = 1.0;
-    
-    float scale = max(imageAspect / containerAspect, 
-                     containerAspect / imageAspect);
     
     vec2 st = vec2(vUvs.x, 1.0 - vUvs.y);
-    st = (st - 0.5) * scale + 0.5;
-    
-    st = clamp(st, 0.0, 1.0);
     st = st * cellSize + cellOffset;
     
     outColor = texture(uTex, st);
@@ -881,24 +871,47 @@ class InfiniteGridMenu {
     canvas.width = this.atlasSize * cellSize;
     canvas.height = this.atlasSize * cellSize;
 
-    Promise.all(
-      this.items.map(
-        item =>
-          new Promise<HTMLImageElement>(resolve => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => resolve(img);
-            img.src = item.image;
-          })
-      )
-    ).then(images => {
-      images.forEach((img, i) => {
-        const x = (i % this.atlasSize) * cellSize;
-        const y = Math.floor(i / this.atlasSize) * cellSize;
-        ctx.drawImage(img, x, y, cellSize, cellSize);
-      });
+      Promise.all(
+        this.items.map(
+          item =>
+            new Promise<HTMLImageElement>(resolve => {
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.onload = () => resolve(img);
+              img.src = item.image;
+            })
+        )
+      ).then(images => {
+        images.forEach((img, i) => {
+          const x = (i % this.atlasSize) * cellSize;
+          const y = Math.floor(i / this.atlasSize) * cellSize;
+          
+          // Cover fit logic
+          const imgRatio = img.width / img.height;
+          const cellRatio = 1; // cellSize / cellSize
+          let drawWidth, drawHeight, offsetX, offsetY;
 
-      gl.bindTexture(gl.TEXTURE_2D, this.tex);
+          if (imgRatio > cellRatio) {
+            drawHeight = cellSize;
+            drawWidth = cellSize * imgRatio;
+            offsetX = -(drawWidth - cellSize) / 2;
+            offsetY = 0;
+          } else {
+            drawWidth = cellSize;
+            drawHeight = cellSize / imgRatio;
+            offsetX = 0;
+            offsetY = -(drawHeight - cellSize) / 2;
+          }
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x, y, cellSize, cellSize);
+          ctx.clip();
+          ctx.drawImage(img, x + offsetX, y + offsetY, drawWidth, drawHeight);
+          ctx.restore();
+        });
+
+        gl.bindTexture(gl.TEXTURE_2D, this.tex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
       gl.generateMipmap(gl.TEXTURE_2D);
     });
@@ -943,7 +956,7 @@ class InfiniteGridMenu {
     this.control.update(deltaTime, this.TARGET_FRAME_DURATION);
 
     const positions = this.instancePositions.map(p => vec3.transformQuat(vec3.create(), p, this.control.orientation));
-    const scale = 0.25;
+    const scale = 0.45;
     const SCALE_INTENSITY = 0.6;
 
     positions.forEach((p, ndx) => {

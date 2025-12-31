@@ -188,7 +188,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          viewport={{ once: true }}
+            viewport={{ once: false }}
           className="container mx-auto px-6 mb-16 text-center"
         >
           <h2 className="text-4xl md:text-6xl font-sans text-white tracking-tighter mb-4">
@@ -224,7 +224,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          viewport={{ once: true }}
+            viewport={{ once: false }}
           className="relative z-10 flex flex-col items-center space-y-12 text-center"
         >
           <div className="space-y-4">

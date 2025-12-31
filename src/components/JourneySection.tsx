@@ -120,7 +120,7 @@ function JourneyItem({ item, index }: { item: typeof JOURNEY_DATA[0], index: num
         initial={{ opacity: 0, x: isEven ? -50 : 50 }}
         whileInView={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: false, margin: "-100px" }}
         className="flex-1 space-y-6"
       >
         <div className="space-y-2">
@@ -142,7 +142,7 @@ function JourneyItem({ item, index }: { item: typeof JOURNEY_DATA[0], index: num
         initial={{ opacity: 0, scale: 0.9, x: isEven ? 50 : -50 }}
         whileInView={{ opacity: 1, scale: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true, margin: "-100px" }}
+        viewport={{ once: false, margin: "-100px" }}
         className="flex-1 w-full max-w-md"
       >
         <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 group shadow-2xl shadow-green-500/5">

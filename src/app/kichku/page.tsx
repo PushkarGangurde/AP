@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Heart, Cake, Music, Utensils, Film, Car, CloudSun } from 'lucide-react';
 import RotatingText from '@/components/RotatingText';
 import MagicBento, { BentoCard } from '@/components/MagicBento';

@@ -64,7 +64,7 @@ export default function KichkuPage() {
             enableStars={false}
           >
             <ProfileCard
-              name="Kichku"
+              name="Pushkar Gangurde"
               title="The King of Chaos"
               handle="kichku"
               status="Online"

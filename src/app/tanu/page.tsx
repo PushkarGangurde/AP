@@ -64,7 +64,7 @@ export default function TanuPage() {
             enableStars={false}
           >
             <ProfileCard
-              name="Tanu"
+              name="Aarohi Bachhav"
               title="The Queen of Everything"
               handle="tanu"
               status="Online"

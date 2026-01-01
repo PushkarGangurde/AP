@@ -110,21 +110,21 @@ export default function HomePage() {
             <div className="flex flex-col items-center">
               <TextType 
                 text={["Welcome to"]}
-                typingSpeed={200}
+                typingSpeed={400}
                 pauseDuration={3000}
                 showCursor={true}
                 cursorCharacter="|"
                 loop={false}
-                initialDelay={0}
-                className="text-slate-400 text-2xl md:text-3xl tracking-[0.2em] uppercase mb-4"
+                initialDelay={500}
+                className="text-slate-200 text-2xl md:text-3xl tracking-[0.2em] uppercase mb-4"
               />
               <DecryptedText
                 text="7to14"
                 animateOn="view"
                 revealDirection="center"
-                speed={100}
-                maxIterations={20}
-                initialDelay={0}
+                sequential={true}
+                speed={1200}
+                initialDelay={1500}
                 className="text-white"
                 encryptedClassName="text-white/30"
                 parentClassName="text-6xl md:text-8xl font-sans tracking-tighter"

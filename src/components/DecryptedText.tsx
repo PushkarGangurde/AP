@@ -15,6 +15,7 @@ interface DecryptedTextProps extends HTMLMotionProps<'span'> {
   encryptedClassName?: string;
   parentClassName?: string;
   animateOn?: 'view' | 'hover' | 'both';
+  initialDelay?: number;
 }
 
 export default function DecryptedText({
@@ -29,6 +30,7 @@ export default function DecryptedText({
   parentClassName = '',
   encryptedClassName = '',
   animateOn = 'hover',
+  initialDelay = 0,
   ...props
 }: DecryptedTextProps) {
   const [displayText, setDisplayText] = useState<string>(text);
@@ -36,9 +38,21 @@ export default function DecryptedText({
   const [isScrambling, setIsScrambling] = useState<boolean>(false);
   const [revealedIndices, setRevealedIndices] = useState<Set<number>>(new Set());
   const [hasAnimated, setHasAnimated] = useState<boolean>(false);
+  const [delayComplete, setDelayComplete] = useState<boolean>(initialDelay === 0);
   const containerRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    if (initialDelay > 0) {
+      const delayTimer = setTimeout(() => {
+        setDelayComplete(true);
+      }, initialDelay);
+      return () => clearTimeout(delayTimer);
+    }
+  }, [initialDelay]);
+
+  useEffect(() => {
+    if (!delayComplete) return;
+    
     let interval: NodeJS.Timeout;
     let currentIteration = 0;
 
@@ -144,7 +158,7 @@ export default function DecryptedText({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isHovering, text, speed, maxIterations, sequential, revealDirection, characters, useOriginalCharsOnly]);
+  }, [isHovering, text, speed, maxIterations, sequential, revealDirection, characters, useOriginalCharsOnly, delayComplete]);
 
   useEffect(() => {
     if (animateOn !== 'view' && animateOn !== 'both') return;

@@ -115,6 +115,7 @@ export default function HomePage() {
                 showCursor={true}
                 cursorCharacter="|"
                 loop={false}
+                initialDelay={2000}
                 className="text-slate-400 text-2xl md:text-3xl tracking-[0.2em] uppercase mb-4 opacity-50"
               />
               <DecryptedText
@@ -122,6 +123,7 @@ export default function HomePage() {
                 animateOn="view"
                 revealDirection="center"
                 speed={100}
+                initialDelay={2000}
                 className="text-white"
                 encryptedClassName="text-white/30"
                 parentClassName="text-6xl md:text-8xl font-sans tracking-tighter"

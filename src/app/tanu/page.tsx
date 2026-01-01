@@ -11,8 +11,16 @@ const TANU_BIRTH_DATE = new Date(2005, 4, 14);
 
 export default function TanuPage() {
   return (
-    <div className="min-h-screen bg-black py-12 px-4">
-      <svg width="0" height="0">
+    <div className="min-h-screen bg-black py-12 px-4 relative overflow-hidden">
+      {/* Background Image Poster */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50"
+        style={{ backgroundImage: 'url("/images/tanu-bg.jpg")' }}
+      />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black via-black/20 to-black" />
+
+      <div className="relative z-10">
+        <svg width="0" height="0">
         <defs>
           <linearGradient id="aurora-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#14e818" />
@@ -183,7 +191,8 @@ export default function TanuPage() {
             </div>
           </BentoCard>
         </div>
-      </MagicBento>
+        </MagicBento>
+      </div>
     </div>
   );
 }

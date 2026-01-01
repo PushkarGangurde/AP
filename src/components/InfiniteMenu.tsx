@@ -62,30 +62,20 @@ in vec2 vUvs;
 in float vAlpha;
 flat in int vInstanceId;
 
-void main() {
-    int itemIndex = vInstanceId % uItemCount;
-    int cellsPerRow = uAtlasSize;
-    int cellX = itemIndex % cellsPerRow;
-    int cellY = itemIndex / cellsPerRow;
-    vec2 cellSize = vec2(1.0) / vec2(float(cellsPerRow));
-    vec2 cellOffset = vec2(float(cellX), float(cellY)) * cellSize;
-
-    ivec2 texSize = textureSize(uTex, 0);
-    float imageAspect = float(texSize.x) / float(texSize.y);
-    float containerAspect = 1.0;
+    void main() {
+        int itemIndex = vInstanceId % uItemCount;
+        int cellsPerRow = uAtlasSize;
+        int cellX = itemIndex % cellsPerRow;
+        int cellY = itemIndex / cellsPerRow;
+        vec2 cellSize = vec2(1.0) / vec2(float(cellsPerRow));
+        vec2 cellOffset = vec2(float(cellX), float(cellY)) * cellSize;
     
-    float scale = max(imageAspect / containerAspect, 
-                     containerAspect / imageAspect);
-    
-    vec2 st = vec2(vUvs.x, 1.0 - vUvs.y);
-    st = (st - 0.5) * scale + 0.5;
-    
-    st = clamp(st, 0.0, 1.0);
-    st = st * cellSize + cellOffset;
-    
-    outColor = texture(uTex, st);
-    outColor.a *= vAlpha;
-}
+        vec2 st = vec2(vUvs.x, 1.0 - vUvs.y);
+        st = st * cellSize + cellOffset;
+        
+        outColor = texture(uTex, st);
+        outColor.a *= vAlpha;
+    }
 `;
 
 class Face {
@@ -877,14 +867,31 @@ class InfiniteGridMenu {
             img.src = item.image;
           })
       )
-    ).then(images => {
-      images.forEach((img, i) => {
-        const x = (i % this.atlasSize) * cellSize;
-        const y = Math.floor(i / this.atlasSize) * cellSize;
-        ctx.drawImage(img, x, y, cellSize, cellSize);
-      });
+      ).then(images => {
+        images.forEach((img, i) => {
+          const x = (i % this.atlasSize) * cellSize;
+          const y = Math.floor(i / this.atlasSize) * cellSize;
+          
+          // Calculate cover dimensions to maintain aspect ratio
+          const imgRatio = img.width / img.height;
+          let sx, sy, sw, sh;
+          
+          if (imgRatio > 1) { // Landscape
+            sh = img.height;
+            sw = img.height;
+            sx = (img.width - sw) / 2;
+            sy = 0;
+          } else { // Portrait
+            sw = img.width;
+            sh = img.width;
+            sx = 0;
+            sy = (img.height - sh) / 2;
+          }
+          
+          ctx.drawImage(img, sx, sy, sw, sh, x, y, cellSize, cellSize);
+        });
 
-      gl.bindTexture(gl.TEXTURE_2D, this.tex);
+        gl.bindTexture(gl.TEXTURE_2D, this.tex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
       gl.generateMipmap(gl.TEXTURE_2D);
     });

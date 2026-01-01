@@ -62,7 +62,6 @@ export default function KichkuPage() {
             enableTilt={false}
             enableMagnetism={false}
             enableStars={false}
-            backgroundImage="/images/kichku-bg.jpg"
           >
             <ProfileCard
               name="Kichku"
@@ -71,6 +70,7 @@ export default function KichkuPage() {
               status="Online"
               contactText="Love"
               avatarUrl="/placeholder-avatar.jpg"
+              backgroundImage="/images/kichku-bg.jpg"
               showUserInfo={true}
               enableTilt={true}
               enableMobileTilt={false}

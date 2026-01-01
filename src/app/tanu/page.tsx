@@ -62,7 +62,6 @@ export default function TanuPage() {
             enableTilt={false}
             enableMagnetism={false}
             enableStars={false}
-            backgroundImage="/images/tanu-bg.jpg"
           >
             <ProfileCard
               name="Tanu"
@@ -71,6 +70,7 @@ export default function TanuPage() {
               status="Online"
               contactText="Love"
               avatarUrl="/placeholder-avatar.jpg"
+              backgroundImage="/images/tanu-bg.jpg"
               showUserInfo={true}
               enableTilt={true}
               enableMobileTilt={false}

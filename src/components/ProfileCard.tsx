@@ -5,6 +5,7 @@ import './ProfileCard.css';
 
 interface ProfileCardProps {
   avatarUrl: string;
+  backgroundImage?: string;
   iconUrl?: string;
   grainUrl?: string;
   innerGradient?: string;
@@ -42,6 +43,7 @@ const adjust = (v: number, fMin: number, fMax: number, tMin: number, tMax: numbe
 
 const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   avatarUrl = '',
+  backgroundImage = '',
   iconUrl = '',
   grainUrl = '',
   innerGradient,
@@ -319,11 +321,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       ({
         '--icon': iconUrl ? `url(${iconUrl})` : 'none',
         '--grain': grainUrl ? `url(${grainUrl})` : 'none',
+        '--background-image': backgroundImage ? `url(${backgroundImage})` : 'none',
         '--inner-gradient': innerGradient ?? DEFAULT_INNER_GRADIENT,
         '--behind-glow-color': behindGlowColor ?? 'rgba(20, 232, 24, 0.4)',
         '--behind-glow-size': behindGlowSize ?? '50%'
       }) as React.CSSProperties,
-    [iconUrl, grainUrl, innerGradient, behindGlowColor, behindGlowSize]
+    [iconUrl, grainUrl, backgroundImage, innerGradient, behindGlowColor, behindGlowSize]
   );
 
   const handleContactClick = useCallback(() => {

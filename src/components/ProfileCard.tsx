@@ -23,6 +23,7 @@ interface ProfileCardProps {
   status?: string;
   contactText?: string;
   showUserInfo?: boolean;
+  showAvatar?: boolean;
   onContactClick?: () => void;
 }
 
@@ -59,10 +60,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   title = 'Title',
   handle = 'handle',
   status = 'Online',
-  contactText = 'Contact',
-  showUserInfo = true,
-  onContactClick
-}) => {
+    contactText = 'Contact',
+    showUserInfo = true,
+    showAvatar = true,
+    onContactClick
+  }) => {
+
   const wrapRef = useRef<HTMLDivElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
 
@@ -338,23 +341,26 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       {behindGlowEnabled && <div className="pc-behind" />}
       <div ref={shellRef} className="pc-card-shell">
         <section className="pc-card">
-          <div className="pc-inside">
-            <div className="pc-bg-image" />
-            <div className="pc-shine" />
-            <div className="pc-glare" />
-            <div className="pc-content pc-avatar-content">
-              <img
-                className="avatar"
-                src={avatarUrl}
-                alt={`${name || 'User'} avatar`}
-                loading="lazy"
-                onError={e => {
-                  const t = e.target as HTMLImageElement;
-                  t.style.display = 'none';
-                }}
-              />
-            </div>
-            <div className="pc-content">
+            <div className={`pc-inside ${!showAvatar ? 'pc-no-avatar' : ''}`}>
+              <div className="pc-bg-image" />
+              <div className="pc-shine" />
+              <div className="pc-glare" />
+              {showAvatar && (
+                <div className="pc-content pc-avatar-content">
+                  <img
+                    className="avatar"
+                    src={avatarUrl}
+                    alt={`${name || 'User'} avatar`}
+                    loading="lazy"
+                    onError={e => {
+                      const t = e.target as HTMLImageElement;
+                      t.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              <div className="pc-content">
+
               <div className="pc-details">
                 <h3>{name}</h3>
                 <p>{title}</p>

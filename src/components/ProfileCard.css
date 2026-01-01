@@ -72,6 +72,10 @@
   flex-direction: column;
 }
 
+.pc-no-avatar {
+  justify-content: flex-end;
+}
+
 .pc-bg-image {
   position: absolute;
   inset: 0;

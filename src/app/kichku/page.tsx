@@ -72,6 +72,7 @@ export default function KichkuPage() {
               avatarUrl="/placeholder-avatar.jpg"
               backgroundImage="/images/kichku-bg.jpg"
               showUserInfo={true}
+              showAvatar={false}
               enableTilt={true}
               enableMobileTilt={false}
               behindGlowColor="rgba(20, 232, 24, 0.4)"

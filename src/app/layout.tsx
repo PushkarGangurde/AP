@@ -10,6 +10,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { TopLoader } from "@/components/TopLoader";
 
 import { AuroraGradient } from "@/components/AuroraGradient";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -20,6 +21,9 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "7to14 | Our Journey",
   description: "A private digital space for our memories.",
+  icons: {
+    icon: "/images/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -38,8 +42,10 @@ export default function RootLayout({
               {children}
             </main>
           </PageTransition>
-          <Navbar />
-          <Toaster position="top-center" />
+            <Navbar />
+            <AudioPlayer />
+            <Toaster position="top-center" />
+
           <VisualEditsMessenger />
             <SplashCursor 
               DYE_RESOLUTION={512} 

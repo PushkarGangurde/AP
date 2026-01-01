@@ -72,6 +72,7 @@ export default function TanuPage() {
               avatarUrl="/placeholder-avatar.jpg"
               backgroundImage="/images/tanu-bg.jpg"
               showUserInfo={true}
+              showAvatar={false}
               enableTilt={true}
               enableMobileTilt={false}
               behindGlowColor="rgba(181, 61, 255, 0.4)"

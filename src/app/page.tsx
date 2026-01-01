@@ -121,7 +121,7 @@ export default function HomePage() {
               <DecryptedText
                 text="7to14"
                 animateOn="view"
-                speed={30}
+                speed={80}
                 totalDuration={3000}
                 className="text-white"
                 encryptedClassName="text-white/30"

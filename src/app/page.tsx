@@ -11,6 +11,7 @@ import { Aurora } from '@/components/Aurora';
 import { JourneySection } from '@/components/JourneySection';
 import FlowingMenu from '@/components/FlowingMenu';
 import { TextType } from '@/components/TextType';
+import DecryptedText from '@/components/DecryptedText';
 
 const START_DATE = new Date(2020, 0, 7); // Jan 7, 2020
 
@@ -116,9 +117,15 @@ export default function HomePage() {
                 loop={false}
                 className="text-slate-400 text-2xl md:text-3xl tracking-[0.2em] uppercase mb-4 opacity-50"
               />
-              <h1 className="text-6xl md:text-8xl font-sans text-white tracking-tighter">
-                7to14
-              </h1>
+              <DecryptedText
+                text="7to14"
+                animateOn="view"
+                revealDirection="center"
+                speed={100}
+                className="text-white"
+                encryptedClassName="text-white/30"
+                parentClassName="text-6xl md:text-8xl font-sans tracking-tighter"
+              />
             </div>
             
             <p className="max-w-md text-slate-400 text-sm md:text-base font-light tracking-wide leading-relaxed">

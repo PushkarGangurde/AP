@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 import { Dumbbell, ArrowRight, Activity, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { AuroraHearts } from '@/components/AuroraHearts';
+import { AuroraDumbbells } from '@/components/AuroraDumbbells';
 
 export default function MovePage() {
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
 
   return (
     <div className="relative min-h-screen bg-black overflow-hidden flex flex-col items-center justify-center p-6 text-center">
-      <AuroraHearts />
+      <AuroraDumbbells />
       
       <div className="relative z-10 max-w-2xl space-y-8">
         <motion.div

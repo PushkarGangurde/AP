@@ -5,12 +5,12 @@ import { ArrowLeft, Clock, BarChart3, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { workoutPlan } from '@/lib/workout-data';
-import { AuroraHearts } from '@/components/AuroraHearts';
+import { AuroraDumbbells } from '@/components/AuroraDumbbells';
 
 export default function PlanPage() {
   return (
     <div className="relative min-h-screen bg-black p-6 md:p-12">
-      <AuroraHearts />
+      <AuroraDumbbells />
       
       <div className="max-w-4xl mx-auto space-y-12 relative z-10">
         <div className="flex items-center justify-between">

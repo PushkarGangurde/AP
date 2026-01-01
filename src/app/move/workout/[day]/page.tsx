@@ -6,8 +6,7 @@ import { ArrowLeft, Play, CheckCircle2, Circle, Clock, Info } from 'lucide-react
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { workoutPlan, WorkoutDay } from '@/lib/workout-data';
-import { AuroraHearts } from '@/components/AuroraHearts';
-import { useMemo } from 'react';
+import { AuroraDumbbells } from '@/components/AuroraDumbbells';
 
 export default function WorkoutDetailPage() {
   const { day } = useParams();
@@ -51,7 +50,7 @@ export default function WorkoutDetailPage() {
 
   return (
     <div className="relative min-h-screen bg-black p-6 md:p-12 pb-32">
-      <AuroraHearts />
+      <AuroraDumbbells />
       
       <div className="max-w-3xl mx-auto space-y-12 relative z-10">
         <div className="flex items-center justify-between">

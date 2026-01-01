@@ -4,6 +4,10 @@ import { motion } from 'motion/react';
 import { Heart, Cake, Music, Utensils, MapPin, Film, Car, CloudSun } from 'lucide-react';
 import RotatingText from '@/components/RotatingText';
 import MagicBento, { BentoCard } from '@/components/MagicBento';
+import ProfileCard from '@/components/ProfileCard';
+import AgeCounter from '@/components/AgeCounter';
+
+const KICHKU_BIRTH_DATE = new Date(2005, 10, 28);
 
 export default function KichkuPage() {
   return (
@@ -52,33 +56,36 @@ export default function KichkuPage() {
         particleCount={12}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <BentoCard className="lg:col-span-2 lg:row-span-2 p-6 min-h-[300px] flex flex-col justify-between">
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              <Heart size={16} stroke="url(#aurora-gradient)" />
-              <span>Profile</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#14e818] via-[#017ed5] to-[#b53dff] p-[2px] mb-4">
-                <div className="w-full h-full rounded-full bg-black/80 flex items-center justify-center text-3xl">
-                  🤴
-                </div>
-              </div>
-              <h2 className="text-2xl font-bold text-white">Kichku</h2>
-              <p className="text-white/50 text-sm mt-1">The King of Chaos</p>
-            </div>
+          <BentoCard 
+            className="lg:col-span-2 lg:row-span-2 p-6 min-h-[400px] flex items-center justify-center"
+            enableTilt={false}
+            enableMagnetism={false}
+            enableStars={false}
+          >
+            <ProfileCard
+              name="Kichku"
+              title="The King of Chaos"
+              handle="kichku"
+              status="Online"
+              contactText="Love"
+              avatarUrl="/placeholder-avatar.jpg"
+              showUserInfo={true}
+              enableTilt={true}
+              enableMobileTilt={false}
+              behindGlowColor="rgba(20, 232, 24, 0.4)"
+              innerGradient="linear-gradient(145deg, rgba(20, 232, 24, 0.3) 0%, rgba(1, 126, 213, 0.2) 100%)"
+            />
           </BentoCard>
 
-          <BentoCard className="lg:col-span-2 p-6 min-h-[140px] flex flex-col justify-between">
+          <BentoCard className="lg:col-span-2 p-6 min-h-[180px] flex flex-col justify-between">
             <div className="flex items-center gap-2 text-white/60 text-sm">
               <Cake size={16} stroke="url(#aurora-gradient)" />
-              <span>Birthday Countdown</span>
+              <span>Living for</span>
             </div>
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-4xl font-bold text-gradient">-- Days</p>
-                <p className="text-white/50 text-sm mt-1">Until your special day</p>
-              </div>
+            <div className="flex-1 flex items-center justify-center py-4">
+              <AgeCounter birthDate={KICHKU_BIRTH_DATE} />
             </div>
+            <p className="text-white/40 text-xs text-center">Since November 28, 2005</p>
           </BentoCard>
 
           <BentoCard className="lg:col-span-2 p-6 min-h-[140px] flex flex-col justify-between">
@@ -166,7 +173,7 @@ export default function KichkuPage() {
                 <p className="text-white/80 text-lg italic leading-relaxed">
                   "A heartfelt note from your partner will appear here..."
                 </p>
-                <p className="text-white/40 text-sm mt-4">- From Tanu 💚</p>
+                <p className="text-white/40 text-sm mt-4">- From Tanu</p>
               </div>
               <div className="flex gap-2">
                 <div className="w-16 h-20 rounded-lg bg-white/5 border border-white/10 rotate-[-5deg]"></div>

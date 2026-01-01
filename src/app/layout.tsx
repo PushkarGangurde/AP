@@ -22,7 +22,10 @@ export const metadata: Metadata = {
   title: "7to14 | Our Journey",
   description: "A private digital space for our memories.",
   icons: {
-    icon: "/images/favicon.png",
+    icon: [
+      { url: "/images/favicon.png", type: "image/png" },
+    ],
+    apple: "/images/favicon.png",
   },
 };
 

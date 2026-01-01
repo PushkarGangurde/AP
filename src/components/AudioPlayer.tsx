@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX, Music } from 'lucide-react';
+import { Volume2, VolumeX, Music, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function AudioPlayer() {
@@ -53,8 +53,10 @@ export function AudioPlayer() {
     <div className="fixed bottom-6 left-6 z-[100] flex items-center gap-2">
       <audio
         ref={audioRef}
-        src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808f3030e.mp3"
+        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
         loop
+        crossOrigin="anonymous"
+        onError={(e) => console.error("Audio Error:", e)}
       />
       
       <motion.button
@@ -74,16 +76,16 @@ export function AudioPlayer() {
             >
               <Music size={18} className="animate-pulse" />
             </motion.div>
-          ) : (
-            <motion.div
-              key="play"
-              initial={{ opacity: 0, rotate: 90 }}
-              animate={{ opacity: 1, rotate: 0 }}
-              exit={{ opacity: 0, rotate: -90 }}
-            >
-              <VolumeX size={18} />
-            </motion.div>
-          )}
+            ) : (
+              <motion.div
+                key="play"
+                initial={{ opacity: 0, rotate: 90 }}
+                animate={{ opacity: 1, rotate: 0 }}
+                exit={{ opacity: 0, rotate: -90 }}
+              >
+                <Play size={18} fill="currentColor" />
+              </motion.div>
+            )}
         </AnimatePresence>
       </motion.button>
 

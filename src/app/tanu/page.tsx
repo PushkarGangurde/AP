@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { Heart, Cake, Music, Utensils, Film, Car, CloudSun } from 'lucide-react';
+import { Heart, Cake, Music, Utensils, Film, Car, CloudSun, ExternalLink } from 'lucide-react';
 import RotatingText from '@/components/RotatingText';
 import MagicBento, { BentoCard } from '@/components/MagicBento';
 import ProfileCard from '@/components/ProfileCard';
@@ -188,9 +188,10 @@ export default function TanuPage() {
               href="https://aarohibachhav.nicepage.io/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-transparent bg-clip-text bg-gradient-to-r from-[#14e818] via-[#017ed5] to-[#b53dff] hover:underline text-sm"
+              className="mt-2 inline-flex items-center gap-2 px-6 py-2 rounded-full bg-gradient-to-r from-[#14e818] via-[#017ed5] to-[#b53dff] text-black font-bold hover:shadow-[0_0_20px_rgba(1,126,213,0.4)] transition-all hover:scale-105 active:scale-95 group"
             >
-              aarohibachhav.nicepage.io
+              <span className="text-sm">aarohibachhav.nicepage.io</span>
+              <ExternalLink size={14} />
             </a>
           </BentoCard>
         </div>

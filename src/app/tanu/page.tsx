@@ -123,7 +123,7 @@ export default function TanuPage() {
 
           <BentoCard 
             className="p-6 min-h-[180px] flex flex-col justify-between border-black/50"
-            backgroundImage="/images/dark cloudy.jpg"
+            backgroundImage="/images/dark-cloudy.jpg"
           >
             <div className="flex items-center gap-2 text-white/80 text-sm">
               <CloudSun size={16} />
@@ -149,7 +149,7 @@ export default function TanuPage() {
 
           <BentoCard 
             className="p-6 min-h-[180px] flex flex-col justify-between border-black/50"
-            backgroundImage="/images/porce 911.jpg"
+            backgroundImage="/images/porche-911.jpg"
           >
             <div className="flex items-center gap-2 text-white/80 text-sm">
               <Car size={16} />

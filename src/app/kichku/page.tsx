@@ -136,7 +136,7 @@ export default function KichkuPage() {
 
           <BentoCard 
             className="p-6 min-h-[180px] flex flex-col justify-between border-black/50"
-            backgroundImage="/images/iron man.jpg"
+            backgroundImage="/images/iron-man.jpg"
           >
             <div className="flex items-center gap-2 text-white/80 text-sm">
               <Film size={16} />
@@ -149,7 +149,7 @@ export default function KichkuPage() {
 
           <BentoCard 
             className="p-6 min-h-[180px] flex flex-col justify-between border-black/50"
-            backgroundImage="/images/bmw m3.jpg"
+            backgroundImage="/images/bmw-m3.jpg"
           >
             <div className="flex items-center gap-2 text-white/80 text-sm">
               <Car size={16} />

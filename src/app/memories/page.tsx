@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Image as ImageIcon, X, Upload, Trash2 } from 'lucide-react';
 import { Loader } from '@/components/Loader';
@@ -78,6 +78,8 @@ export default function MemoriesPage() {
   // Upload State
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchPhotos();
@@ -133,6 +135,34 @@ export default function MemoriesPage() {
       setIsVerifying(false);
     }
   };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
 
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -219,28 +249,38 @@ export default function MemoriesPage() {
                   <DialogTitle className="font-sans text-xl">Capture a Memory</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 pt-4">
-                  <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-slate-500">Photo</label>
-                    <div className="border-2 border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center space-y-4 hover:border-[#00ffff] transition-colors cursor-pointer relative overflow-hidden">
-                      <Input 
-                        type="file" 
-                        className="absolute inset-0 opacity-0 cursor-pointer" 
-                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                        accept="image/*"
-                      />
-                      {selectedFile ? (
-                        <div className="text-center">
-                          <ImageIcon className="mx-auto mb-2 text-[#00ffff]" size={32} />
-                          <p className="text-sm text-slate-300 truncate max-w-[200px]">{selectedFile.name}</p>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <Upload className="mx-auto text-slate-600 mb-2" size={32} />
-                          <p className="text-sm text-slate-600">Click or drag to upload</p>
-                        </div>
-                      )}
+                    <div className="space-y-2">
+                      <label className="text-xs uppercase tracking-widest text-slate-500">Photo</label>
+                      <div 
+                        onDragOver={handleDragOver}
+                        onDragEnter={handleDragEnter}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center space-y-4 transition-colors cursor-pointer relative overflow-hidden ${
+                          isDragging ? 'border-[#00ffff] bg-[#00ffff]/5' : 'border-slate-800 hover:border-[#00ffff]'
+                        }`}
+                      >
+                        <input 
+                          type="file" 
+                          ref={fileInputRef}
+                          className="hidden" 
+                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                          accept="image/*"
+                        />
+                        {selectedFile ? (
+                          <div className="text-center">
+                            <ImageIcon className="mx-auto mb-2 text-[#00ffff]" size={32} />
+                            <p className="text-sm text-slate-300 truncate max-w-[200px]">{selectedFile.name}</p>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Upload className={`mx-auto mb-2 ${isDragging ? 'text-[#00ffff]' : 'text-slate-600'}`} size={32} />
+                            <p className="text-sm text-slate-600">Click or drag to upload</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
                   <Button 
                     className="w-full h-12 bg-white text-black hover:bg-slate-200 rounded-xl shadow-md font-medium border-none"

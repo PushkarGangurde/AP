@@ -724,38 +724,59 @@ class InfiniteGridMenu {
     public smoothRotationVelocity = 0;
     public scaleFactor = 1.0;
 
-    constructor(
-      private canvas: HTMLCanvasElement,
-      private items: MenuItem[],
-      private onActiveItemChange: ActiveItemCallback,
-      private onItemDoubleClick: ItemDoubleClickCallback,
-      private onMovementChange: MovementChangeCallback,
-      onInit?: InitCallback,
-      scale: number = 1.0
-    ) {
-      this.scaleFactor = scale;
-      this.camera.position[2] = 3 * scale;
-      
-      this.canvas.addEventListener('dblclick', () => {
-        const nearestVertexIndex = this.findNearestVertexIndex();
-        const itemIndex = nearestVertexIndex % Math.max(1, this.items.length);
-        this.onItemDoubleClick(itemIndex);
-      });
+  private disposed = false;
 
-      this.init(onInit);
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private items: MenuItem[],
+    private onActiveItemChange: ActiveItemCallback,
+    private onItemDoubleClick: ItemDoubleClickCallback,
+    private onMovementChange: MovementChangeCallback,
+    onInit?: InitCallback,
+    scale: number = 1.0
+  ) {
+    this.scaleFactor = scale;
+    this.camera.position[2] = 3 * scale;
+    
+    this.canvas.addEventListener('dblclick', this.handleDoubleClick);
+
+    this.init(onInit);
+  }
+
+  private handleDoubleClick = () => {
+    const nearestVertexIndex = this.findNearestVertexIndex();
+    const itemIndex = nearestVertexIndex % Math.max(1, this.items.length);
+    this.onItemDoubleClick(itemIndex);
+  };
+
+  public destroy(): void {
+    this.disposed = true;
+    this.canvas.removeEventListener('dblclick', this.handleDoubleClick);
+    if (this.gl) {
+      const gl = this.gl;
+      gl.deleteTexture(this.tex);
+      gl.deleteProgram(this.discProgram);
+      gl.deleteVertexArray(this.discVAO);
+      gl.deleteBuffer(this.discInstances.buffer);
+      // Clean up other buffers if necessary
     }
-
+  }
 
   public resize(): void {
     const needsResize = resizeCanvasToDisplaySize(this.canvas);
     if (!this.gl) return;
-    if (needsResize) {
-      this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-    }
+    
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+    
+    if (width === 0 || height === 0) return;
+
+    this.gl.viewport(0, 0, width, height);
     this.updateProjectionMatrix();
   }
 
   public run(time = 0): void {
+    if (this.disposed) return;
     this._deltaTime = Math.min(32, time - this._time);
     this._time = time;
     this._deltaFrames = this._deltaTime / this.TARGET_FRAME_DURATION;
@@ -766,6 +787,7 @@ class InfiniteGridMenu {
 
     requestAnimationFrame(t => this.run(t));
   }
+
 
   private init(onInit?: InitCallback): void {
     const gl = this.canvas.getContext('webgl2', {
@@ -778,7 +800,7 @@ class InfiniteGridMenu {
     this.gl = gl;
 
     vec2.set(this.viewportSize, this.canvas.clientWidth, this.canvas.clientHeight);
-    vec2.clone(this.drawBufferSize);
+    vec2.copy(this.drawBufferSize, this.viewportSize);
 
     this.discProgram = createProgram(gl, [discVertShaderSource, discFragShaderSource], null, {
       aModelPosition: 0,
@@ -1074,13 +1096,18 @@ export function InfiniteMenu({ items = [], scale = 1.0, onItemDoubleClick }: Inf
   const canvasRef = useRef<HTMLCanvasElement | null>(null) as MutableRefObject<HTMLCanvasElement | null>;
   const [isMoving, setIsMoving] = useState<boolean>(false);
 
+  const onItemDoubleClickRef = useRef(onItemDoubleClick);
+  useEffect(() => {
+    onItemDoubleClickRef.current = onItemDoubleClick;
+  }, [onItemDoubleClick]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     let sketch: InfiniteGridMenu | null = null;
+    let resizeObserver: ResizeObserver | null = null;
 
     const handleActiveItem = (index: number) => {
-      // Logic for active item can remain if needed for future, 
-      // but we don't need to update state if nothing uses it.
+      // Logic for active item can remain if needed for future
     };
 
     if (canvas) {
@@ -1088,26 +1115,32 @@ export function InfiniteMenu({ items = [], scale = 1.0, onItemDoubleClick }: Inf
         canvas,
         items.length ? items : defaultItems,
         handleActiveItem,
-        (index) => onItemDoubleClick?.(index),
+        (index) => onItemDoubleClickRef.current?.(index),
         setIsMoving,
         sk => sk.run(),
         scale
       );
+
+      // Robust resize handling with ResizeObserver
+      resizeObserver = new ResizeObserver(() => {
+        if (sketch) {
+          sketch.resize();
+        }
+      });
+      resizeObserver.observe(canvas);
+
+      // Also force an initial resize after a short delay to ensure layout is settled
+      const timer = setTimeout(() => {
+        if (sketch) sketch.resize();
+      }, 100);
+
+      return () => {
+        if (sketch) sketch.destroy();
+        if (resizeObserver) resizeObserver.disconnect();
+        clearTimeout(timer);
+      };
     }
-
-    const handleResize = () => {
-      if (sketch) {
-        sketch.resize();
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [items, scale]);
+  }, [items, scale, onItemDoubleClick]);
 
   return (
     <div className="relative w-full h-full">

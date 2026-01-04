@@ -48,10 +48,10 @@ export default function DecryptedText({
 
   const startAnimation = () => {
     if (isAnimating) return;
-    
+
     setIsAnimating(true);
     setRevealedIndices(new Set());
-    
+
     scrambleIntervalRef.current = setInterval(() => {
       setRevealedIndices(prev => {
         setDisplayText(scrambleUnrevealed(prev));
@@ -67,7 +67,7 @@ export default function DecryptedText({
         setRevealedIndices(prev => {
           const newSet = new Set(prev);
           newSet.add(i);
-          
+
           if (newSet.size === textLength) {
             if (scrambleIntervalRef.current) {
               clearInterval(scrambleIntervalRef.current);
@@ -75,21 +75,24 @@ export default function DecryptedText({
             setDisplayText(text);
             setIsAnimating(false);
           }
-          
+
           return newSet;
         });
       }, delayPerChar * (i + 1));
-      
+
       revealTimeoutsRef.current.push(timeout);
     }
   };
 
   useEffect(() => {
+    const currentScrambleInterval = scrambleIntervalRef.current;
+    const currentRevealTimeouts = revealTimeoutsRef.current;
+
     return () => {
-      if (scrambleIntervalRef.current) {
-        clearInterval(scrambleIntervalRef.current);
+      if (currentScrambleInterval) {
+        clearInterval(currentScrambleInterval);
       }
-      revealTimeoutsRef.current.forEach(t => clearTimeout(t));
+      currentRevealTimeouts.forEach(t => clearTimeout(t));
     };
   }, []);
 
@@ -119,18 +122,19 @@ export default function DecryptedText({
     return () => {
       if (currentRef) observer.unobserve(currentRef);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animateOn, hasAnimated]);
 
   const hoverProps =
     animateOn === 'hover' || animateOn === 'both'
       ? {
-          onMouseEnter: () => {
-            if (!isAnimating) {
-              setHasAnimated(false);
-              startAnimation();
-            }
+        onMouseEnter: () => {
+          if (!isAnimating) {
+            setHasAnimated(false);
+            startAnimation();
           }
         }
+      }
       : {};
 
   return (
@@ -139,6 +143,7 @@ export default function DecryptedText({
       className={`inline-block whitespace-pre-wrap ${parentClassName}`}
       {...hoverProps}
       {...props}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     >
       <span className="sr-only">{displayText}</span>
 

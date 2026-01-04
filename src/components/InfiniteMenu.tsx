@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useRef, useState, useEffect, MutableRefObject } from 'react';
+import { useRef, useState, useEffect, MutableRefObject } from 'react';
 import { mat4, quat, vec2, vec3 } from 'gl-matrix';
 
 const discVertShaderSource = `#version 300 es
@@ -683,36 +683,36 @@ class InfiniteGridMenu {
   };
 
   private instancePositions: vec3[] = [];
-    private DISC_INSTANCE_COUNT = 0;
-    private atlasSize = 1;
+  private DISC_INSTANCE_COUNT = 0;
+  private atlasSize = 1;
 
-    private _time = 0;
-    private _deltaTime = 0;
-    private _deltaFrames = 0;
-    private _frames = 0;
+  private _time = 0;
+  private _deltaTime = 0;
+  private _deltaFrames = 0;
+  private _frames = 0;
 
-    private movementActive = false;
+  private movementActive = false;
 
-    private TARGET_FRAME_DURATION = 1000 / 60;
-    private SPHERE_RADIUS = 2;
+  private TARGET_FRAME_DURATION = 1000 / 60;
+  private SPHERE_RADIUS = 2;
 
-    public camera: Camera = {
-      matrix: mat4.create(),
-      near: 0.1,
-      far: 40,
-      fov: Math.PI / 4,
-      aspect: 1,
-      position: vec3.fromValues(0, 0, 3),
-      up: vec3.fromValues(0, 1, 0),
-      matrices: {
-        view: mat4.create(),
-        projection: mat4.create(),
-        inversProjection: mat4.create()
-      }
-    };
+  public camera: Camera = {
+    matrix: mat4.create(),
+    near: 0.1,
+    far: 40,
+    fov: Math.PI / 4,
+    aspect: 1,
+    position: vec3.fromValues(0, 0, 3),
+    up: vec3.fromValues(0, 1, 0),
+    matrices: {
+      view: mat4.create(),
+      projection: mat4.create(),
+      inversProjection: mat4.create()
+    }
+  };
 
-    public smoothRotationVelocity = 0;
-    public scaleFactor = 1.0;
+  public smoothRotationVelocity = 0;
+  public scaleFactor = 1.0;
 
   private disposed = false;
 
@@ -727,7 +727,7 @@ class InfiniteGridMenu {
   ) {
     this.scaleFactor = scale;
     this.camera.position[2] = 3 * scale;
-    
+
     this.canvas.addEventListener('dblclick', this.handleDoubleClick);
 
     this.init(onInit);
@@ -753,12 +753,12 @@ class InfiniteGridMenu {
   }
 
   public resize(): void {
-    const needsResize = resizeCanvasToDisplaySize(this.canvas);
+    resizeCanvasToDisplaySize(this.canvas);
     if (!this.gl) return;
-    
+
     const width = this.canvas.width;
     const height = this.canvas.height;
-    
+
     if (width === 0 || height === 0) return;
 
     this.gl.viewport(0, 0, width, height);
@@ -867,21 +867,21 @@ class InfiniteGridMenu {
             img.src = item.image;
           })
       )
-        ).then(images => {
-          images.forEach((img, i) => {
-            const x = (i % this.atlasSize) * cellSize;
-            const y = Math.floor(i / this.atlasSize) * cellSize;
-            
-            const imgW = img.width;
-            const imgH = img.height;
-            const cropSize = Math.min(imgW, imgH);
-            const sx = (imgW - cropSize) / 2;
-            const sy = (imgH - cropSize) / 2;
-            
-            ctx.drawImage(img, sx, sy, cropSize, cropSize, x, y, cellSize, cellSize);
-          });
+    ).then(images => {
+      images.forEach((img, i) => {
+        const x = (i % this.atlasSize) * cellSize;
+        const y = Math.floor(i / this.atlasSize) * cellSize;
 
-        gl.bindTexture(gl.TEXTURE_2D, this.tex);
+        const imgW = img.width;
+        const imgH = img.height;
+        const cropSize = Math.min(imgW, imgH);
+        const sx = (imgW - cropSize) / 2;
+        const sy = (imgH - cropSize) / 2;
+
+        ctx.drawImage(img, sx, sy, cropSize, cropSize, x, y, cellSize, cellSize);
+      });
+
+      gl.bindTexture(gl.TEXTURE_2D, this.tex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
       gl.generateMipmap(gl.TEXTURE_2D);
     });
@@ -1091,6 +1091,7 @@ interface InfiniteMenuProps {
 
 export function InfiniteMenu({ items = [], scale = 1.0, onItemDoubleClick }: InfiniteMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null) as MutableRefObject<HTMLCanvasElement | null>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isMoving, setIsMoving] = useState<boolean>(false);
 
   const onItemDoubleClickRef = useRef(onItemDoubleClick);
@@ -1103,6 +1104,7 @@ export function InfiniteMenu({ items = [], scale = 1.0, onItemDoubleClick }: Inf
     let sketch: InfiniteGridMenu | null = null;
     let resizeObserver: ResizeObserver | null = null;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleActiveItem = (index: number) => {
       // Logic for active item can remain if needed for future
     };
@@ -1137,7 +1139,7 @@ export function InfiniteMenu({ items = [], scale = 1.0, onItemDoubleClick }: Inf
         clearTimeout(timer);
       };
     }
-    }, [items, scale]);
+  }, [items, scale]);
 
   return (
     <div className="relative w-full h-full">

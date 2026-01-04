@@ -58,7 +58,6 @@ const FlowingMenu: React.FC<FlowingMenuProps> = ({
 };
 
 const MenuItem: React.FC<MenuItemProps> = ({
-  link,
   text,
   image,
   speed,

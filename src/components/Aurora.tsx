@@ -188,7 +188,6 @@ export function Aurora(props: AuroraProps) {
     ctn.appendChild(gl.canvas);
 
     let animateId = 0;
-    let lastTime = 0;
 
     const update = (t: number) => {
       animateId = requestAnimationFrame(update);
@@ -222,6 +221,7 @@ export function Aurora(props: AuroraProps) {
       }
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <div ref={ctnDom} className="w-full h-full" />;

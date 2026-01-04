@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX, Music, Play } from 'lucide-react';
+import { Music, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -15,7 +13,7 @@ export function AudioPlayer() {
     if (!audio) return;
 
     audio.volume = 0.3; // Low volume for subtlety
-    
+
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
@@ -36,17 +34,9 @@ export function AudioPlayer() {
       audio.pause();
     } else {
       audio.play().catch(err => {
-        console.log('Autoplay prevented, user interaction needed');
+        console.log('Autoplay prevented, user interaction needed', err);
       });
     }
-    setHasInteracted(true);
-  };
-
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.muted = !isMuted;
-    setIsMuted(!isMuted);
   };
 
   return (
@@ -58,7 +48,7 @@ export function AudioPlayer() {
         crossOrigin="anonymous"
         onError={(e) => console.error("Audio Error:", e)}
       />
-      
+
       <motion.button
         onClick={togglePlay}
         whileHover={{ scale: 1.1 }}
@@ -76,16 +66,16 @@ export function AudioPlayer() {
             >
               <Music size={18} className="animate-pulse" />
             </motion.div>
-            ) : (
-              <motion.div
-                key="play"
-                initial={{ opacity: 0, rotate: 90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: -90 }}
-              >
-                <Play size={18} fill="currentColor" />
-              </motion.div>
-            )}
+          ) : (
+            <motion.div
+              key="play"
+              initial={{ opacity: 0, rotate: 90 }}
+              animate={{ opacity: 1, rotate: 0 }}
+              exit={{ opacity: 0, rotate: -90 }}
+            >
+              <Play size={18} fill="currentColor" />
+            </motion.div>
+          )}
         </AnimatePresence>
       </motion.button>
 

@@ -10,12 +10,12 @@ export async function getPhotos() {
       },
       next: { revalidate: 0 }
     });
-    
+
     if (!res.ok) {
       console.error('Failed to fetch photos:', await res.text());
       return [];
     }
-    
+
     return res.json();
   } catch (error) {
     console.error('Error in getPhotos:', error);
@@ -37,7 +37,9 @@ export async function uploadPhoto(url: string, month: string, year: number, mont
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to upload photo to DB: ${await res.text()}`);
+      const errorText = await res.text();
+      console.error('Failed to upload photo to DB:', errorText);
+      throw new Error('Failed to save photo. Please try again.');
     }
 
     return res.json();
@@ -51,7 +53,7 @@ export async function deletePhoto(id: string, url: string) {
   try {
     // Extract filename from URL
     const fileName = url.split('/').pop();
-    
+
     // Delete from DB
     const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`, {
       method: 'DELETE',
@@ -64,7 +66,7 @@ export async function deletePhoto(id: string, url: string) {
     if (!dbRes.ok) {
       console.error('Failed to delete from DB:', await dbRes.text());
     }
-  
+
     // Delete from Storage
     if (fileName) {
       const storageRes = await fetch(`${SUPABASE_URL}/storage/v1/object/memories/${fileName}`, {
@@ -74,7 +76,7 @@ export async function deletePhoto(id: string, url: string) {
           'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         }
       });
-      
+
       if (!storageRes.ok) {
         console.error('Failed to delete from storage:', await storageRes.text());
       }
@@ -102,7 +104,9 @@ export async function uploadToStorage(file: File) {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to upload image: ${await res.text()}`);
+      const errorText = await res.text();
+      console.error('Failed to upload image:', errorText);
+      throw new Error('Failed to upload image. Please check file size and format.');
     }
 
     return `${SUPABASE_URL}/storage/v1/object/public/memories/${filePath}`;

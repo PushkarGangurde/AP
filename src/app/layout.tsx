@@ -23,9 +23,13 @@ export const metadata: Metadata = {
   description: "A private digital space for our memories.",
   icons: {
     icon: [
-      { url: "/images/favicon.png", type: "image/png" },
+      { url: "/images/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/images/favicon.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: "/images/favicon.png",
+    apple: [
+      { url: "/images/favicon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/images/favicon.png",
   },
 };
 
@@ -35,29 +39,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="en">
-        <body className={`${fredoka.variable} antialiased min-h-screen font-sans`}>
-          <TopLoader />
-          <AuroraGradient />
-          <LenisProvider>
+    <html lang="en">
+      <body className={`${fredoka.variable} antialiased min-h-screen font-sans`}>
+        <TopLoader />
+        <AuroraGradient />
+        <LenisProvider>
           <PageTransition>
             <main className="pb-24">
               {children}
             </main>
           </PageTransition>
-            <Navbar />
-            <AudioPlayer />
-            <Toaster position="top-center" />
+          <Navbar />
+          <AudioPlayer />
+          <Toaster position="top-center" />
 
           <VisualEditsMessenger />
-            <SplashCursor 
-              DYE_RESOLUTION={512} 
-              SIM_RESOLUTION={128} 
-              PRESSURE_ITERATIONS={10} 
-              SPLAT_RADIUS={0.08}
-              DENSITY_DISSIPATION={4.5}
-              VELOCITY_DISSIPATION={3.0}
-            />
+          <SplashCursor
+            DYE_RESOLUTION={512}
+            SIM_RESOLUTION={128}
+            PRESSURE_ITERATIONS={10}
+            SPLAT_RADIUS={0.08}
+            DENSITY_DISSIPATION={4.5}
+            VELOCITY_DISSIPATION={3.0}
+          />
         </LenisProvider>
       </body>
     </html>

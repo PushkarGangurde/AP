@@ -33,6 +33,7 @@ export default function LoginPage() {
         setLoading(false);
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast.error('Something went wrong');
       setLoading(false);
     }
@@ -40,7 +41,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md space-y-8 glass p-10 rounded-3xl"
@@ -69,8 +70,8 @@ export default function LoginPage() {
               required
             />
           </div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full h-12 bg-white text-black hover:bg-slate-200 rounded-xl transition-all font-medium border-none"
             disabled={loading}
           >

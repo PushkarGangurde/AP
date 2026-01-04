@@ -81,6 +81,18 @@ export default function MemoriesPage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const fetchPhotos = useCallback(async () => {
+    try {
+      const data = await getPhotos();
+      setPhotos(data);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to load memories');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchPhotos();
     setIsAdmin(localStorage.getItem('is_admin') === 'true');
@@ -95,19 +107,7 @@ export default function MemoriesPage() {
 
     window.addEventListener('trigger-admin-mode', handleTriggerAdmin);
     return () => window.removeEventListener('trigger-admin-mode', handleTriggerAdmin);
-  }, [isAdmin]);
-
-  const fetchPhotos = async () => {
-    try {
-      const data = await getPhotos();
-      setPhotos(data);
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to load memories');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [fetchPhotos, isAdmin]);
 
   const handleAdminVerify = async () => {
     if (!adminCodeInput) return;
@@ -130,6 +130,7 @@ export default function MemoriesPage() {
         toast.error('Incorrect admin code');
       }
     } catch (error) {
+      console.error('Admin verification error:', error);
       toast.error('Something went wrong');
     } finally {
       setIsVerifying(false);
@@ -172,7 +173,7 @@ export default function MemoriesPage() {
       const month = months[now.getMonth()];
       const year = now.getFullYear();
       const monthNum = now.getMonth() + 1;
-      
+
       const url = await uploadToStorage(selectedFile);
       await uploadPhoto(url, month, year, monthNum);
       toast.success('Memory captured!');
@@ -188,7 +189,7 @@ export default function MemoriesPage() {
 
   const handleDelete = async (photo: Photo) => {
     if (!window.confirm('Are you sure you want to delete this memory?')) return;
-    
+
     try {
       await deletePhoto(photo.id, photo.url);
       toast.success('Memory deleted');
@@ -201,13 +202,13 @@ export default function MemoriesPage() {
   };
 
   // Map real photos to MenuItem format if available
-  const menuItems: MenuItem[] = useMemo(() => photos.length > 0 
+  const menuItems: MenuItem[] = useMemo(() => photos.length > 0
     ? photos.map(p => ({
-        image: p.url,
-        link: '#',
-        title: `${p.month} ${p.year}`,
-        description: 'A captured moment'
-      }))
+      image: p.url,
+      link: '#',
+      title: `${p.month} ${p.year}`,
+      description: 'A captured moment'
+    }))
     : tempItems, [photos]);
 
   const handleItemDoubleClick = useCallback((index: number) => {
@@ -226,9 +227,9 @@ export default function MemoriesPage() {
             <Loader fullScreen={false} size={48} />
           </div>
         ) : (
-          <InfiniteMenu 
-            items={menuItems} 
-            scale={2} 
+          <InfiniteMenu
+            items={menuItems}
+            scale={2}
             onItemDoubleClick={handleItemDoubleClick}
           />
         )}
@@ -249,40 +250,39 @@ export default function MemoriesPage() {
                   <DialogTitle className="font-sans text-xl">Capture a Memory</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 pt-4">
-                    <div className="space-y-2">
-                      <label className="text-xs uppercase tracking-widest text-slate-500">Photo</label>
-                      <div 
-                        onDragOver={handleDragOver}
-                        onDragEnter={handleDragEnter}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center space-y-4 transition-colors cursor-pointer relative overflow-hidden ${
-                          isDragging ? 'border-[#00ffff] bg-[#00ffff]/5' : 'border-slate-800 hover:border-[#00ffff]'
+                  <div className="space-y-2">
+                    <label className="text-xs uppercase tracking-widest text-slate-500">Photo</label>
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragEnter={handleDragEnter}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center space-y-4 transition-colors cursor-pointer relative overflow-hidden ${isDragging ? 'border-[#00ffff] bg-[#00ffff]/5' : 'border-slate-800 hover:border-[#00ffff]'
                         }`}
-                      >
-                        <input 
-                          type="file" 
-                          ref={fileInputRef}
-                          className="hidden" 
-                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                          accept="image/*"
-                        />
-                        {selectedFile ? (
-                          <div className="text-center">
-                            <ImageIcon className="mx-auto mb-2 text-[#00ffff]" size={32} />
-                            <p className="text-sm text-slate-300 truncate max-w-[200px]">{selectedFile.name}</p>
-                          </div>
-                        ) : (
-                          <div className="text-center">
-                            <Upload className={`mx-auto mb-2 ${isDragging ? 'text-[#00ffff]' : 'text-slate-600'}`} size={32} />
-                            <p className="text-sm text-slate-600">Click or drag to upload</p>
-                          </div>
-                        )}
-                      </div>
+                    >
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                        accept="image/*"
+                      />
+                      {selectedFile ? (
+                        <div className="text-center">
+                          <ImageIcon className="mx-auto mb-2 text-[#00ffff]" size={32} />
+                          <p className="text-sm text-slate-300 truncate max-w-[200px]">{selectedFile.name}</p>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className={`mx-auto mb-2 ${isDragging ? 'text-[#00ffff]' : 'text-slate-600'}`} size={32} />
+                          <p className="text-sm text-slate-600">Click or drag to upload</p>
+                        </div>
+                      )}
                     </div>
+                  </div>
 
-                  <Button 
+                  <Button
                     className="w-full h-12 bg-white text-black hover:bg-slate-200 rounded-xl shadow-md font-medium border-none"
                     onClick={handleUpload}
                     disabled={uploading || !selectedFile}
@@ -292,7 +292,7 @@ export default function MemoriesPage() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button 
+            <Button
               className="rounded-full bg-white/10 backdrop-blur-md text-white/70 hover:text-white hover:bg-white/20 shadow-lg px-6 h-10 border border-white/10 text-xs uppercase tracking-widest font-medium"
               onClick={() => {
                 localStorage.removeItem('is_admin');
@@ -315,8 +315,8 @@ export default function MemoriesPage() {
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-widest text-slate-500">Admin Code</label>
-              <Input 
-                type="password" 
+              <Input
+                type="password"
                 placeholder="Enter secret code..."
                 value={adminCodeInput}
                 onChange={(e) => setAdminCodeInput(e.target.value)}
@@ -324,7 +324,7 @@ export default function MemoriesPage() {
                 className="rounded-xl border-slate-800 bg-slate-900 text-white"
               />
             </div>
-            <Button 
+            <Button
               className="w-full h-12 bg-white text-black hover:bg-slate-200 rounded-xl shadow-md font-medium border-none"
               onClick={handleAdminVerify}
               disabled={isVerifying || !adminCodeInput}
@@ -352,19 +352,20 @@ export default function MemoriesPage() {
               className="relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <img 
-                src={selectedPhoto.url} 
-                alt="Fullscreen" 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={selectedPhoto.url}
+                alt="Fullscreen"
                 className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
               />
-              <button 
+              <button
                 className="absolute top-3 right-3 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white/80 hover:text-white transition-all backdrop-blur-sm"
                 onClick={() => setSelectedPhoto(null)}
               >
                 <X size={24} />
               </button>
               {isAdmin && (
-                <button 
+                <button
                   className="absolute top-3 left-3 p-3 bg-red-500/70 hover:bg-red-600 rounded-full text-white transition-all backdrop-blur-sm"
                   onClick={() => handleDelete(selectedPhoto)}
                 >

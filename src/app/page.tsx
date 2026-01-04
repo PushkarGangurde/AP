@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Image as ImageIcon, ArrowRight, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { intervalToDuration } from 'date-fns';
+import { intervalToDuration, type Duration } from 'date-fns';
 import { getPhotos } from '@/lib/supabase';
 import { Aurora } from '@/components/Aurora';
 import { JourneySection } from '@/components/JourneySection';
@@ -35,14 +35,11 @@ export default function HomePage() {
 
   const containerRef = React.useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
-  
+
   // Hero animations based on scroll
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 0.85]);
   const heroY = useTransform(scrollY, [0, 400], [0, -100]);
-
-  // Background Aurora opacity for the rest of the page
-  const bgAuroraOpacity = useTransform(scrollY, [200, 800], [0, 0.3]);
 
   useEffect(() => {
     const updateCounter = () => {
@@ -84,7 +81,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <div ref={containerRef} className="relative min-h-screen flex flex-col items-center justify-center p-6 pt-32 pb-12 overflow-hidden">
         {/* New Aurora Hero Background */}
-        <motion.div 
+        <motion.div
           style={{ opacity: heroOpacity }}
           className="absolute inset-0 z-0 opacity-60"
         >
@@ -96,7 +93,7 @@ export default function HomePage() {
           />
         </motion.div>
 
-        <motion.div 
+        <motion.div
           style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
           className="z-10 w-full max-w-4xl flex flex-col items-center space-y-16"
         >
@@ -108,7 +105,7 @@ export default function HomePage() {
             className="flex flex-col items-center text-center space-y-4"
           >
             <div className="flex flex-col items-center">
-              <TextType 
+              <TextType
                 text={["Welcome to"]}
                 typingSpeed={70}
                 pauseDuration={3000}
@@ -128,21 +125,22 @@ export default function HomePage() {
                 parentClassName="text-6xl md:text-8xl font-sans tracking-tighter"
               />
             </div>
-            
+
             <p className="max-w-md text-slate-400 text-sm md:text-base font-light tracking-wide leading-relaxed">
               A digital archive of our journey, capturing every heartbeat and shared memory since the very beginning.
             </p>
           </motion.div>
 
           {/* Relationship Counter - Premium Style */}
-          <div className="flex flex-col items-center space-y-8 w-full max-w-4xl">
+          <div className="flex flex-col items-center space-y-8 w-full max-w-4xl" role="region" aria-label="Relationship duration counter">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.8 }}
               className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md"
+              aria-label="Relationship start date"
             >
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-2 w-2" aria-hidden="true">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
@@ -160,9 +158,9 @@ export default function HomePage() {
                 >
                   {/* Premium Glow Effect */}
                   <div className="absolute -inset-0.5 bg-gradient-to-b from-white/20 to-transparent rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
-                  
+
                   <div className="relative flex flex-col items-center justify-center bg-black/40 border border-white/10 backdrop-blur-2xl rounded-2xl py-6 px-2 transition-all duration-300 group-hover:border-white/20 group-hover:bg-black/60">
-                    
+
                     {/* Number with transition */}
                     <div className="overflow-hidden h-12 flex items-center justify-center">
                       <motion.span
@@ -179,7 +177,7 @@ export default function HomePage() {
                     <span className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-2 font-medium">
                       {unit.label}
                     </span>
-                    
+
                     {/* Subtle Decorative Line */}
                     <div className="w-4 h-[1px] bg-white/10 mt-3 group-hover:w-8 transition-all duration-500" />
                   </div>
@@ -207,7 +205,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-            viewport={{ once: false }}
+          viewport={{ once: false }}
           className="container mx-auto px-6 mb-16 text-center"
         >
           <h2 className="text-4xl md:text-6xl font-sans text-white tracking-tighter mb-4">
@@ -219,8 +217,8 @@ export default function HomePage() {
         </motion.div>
 
         <div className="h-[900px] relative w-full border-y border-white/5">
-          <FlowingMenu 
-            items={PLACES_TO_VISIT} 
+          <FlowingMenu
+            items={PLACES_TO_VISIT}
             textColor="#fff"
             marqueeBgColor="#fff"
             marqueeTextColor="#000"
@@ -238,12 +236,12 @@ export default function HomePage() {
             speed={0.4}
           />
         </div>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-            viewport={{ once: false }}
+          viewport={{ once: false }}
           className="relative z-10 flex flex-col items-center space-y-12 text-center"
         >
           <div className="space-y-4">
@@ -255,23 +253,23 @@ export default function HomePage() {
             </p>
           </div>
 
-            <div className="flex flex-col items-center space-y-6">
-              <Link href="/memories">
-                <Button size="xl" className="rounded-full bg-white text-black hover:bg-slate-200 border-none shadow-[0_0_30px_rgba(255,255,255,0.2)] px-12 h-16 text-lg font-medium group">
-                  Explore Memories
-                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-            
+          <div className="flex flex-col items-center space-y-6">
+            <Link href="/memories">
+              <Button size="lg" className="rounded-full bg-white text-black hover:bg-slate-200 border-none shadow-[0_0_30px_rgba(255,255,255,0.2)] px-12 h-16 text-lg font-medium group">
+                Explore Memories
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2 text-slate-500 text-xs tracking-widest uppercase">
-                 <ImageIcon size={14} />
-                 <span>{photoCount} Moments</span>
+                <ImageIcon size={14} />
+                <span>{photoCount} Moments</span>
               </div>
               <div className="h-4 w-px bg-white/10" />
               <div className="flex items-center space-x-2 text-slate-500 text-xs tracking-widest uppercase">
-                 <Heart size={14} />
-                 <span>Always</span>
+                <Heart size={14} />
+                <span>Always</span>
               </div>
             </div>
           </div>
